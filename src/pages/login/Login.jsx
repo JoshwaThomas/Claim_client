@@ -1,26 +1,39 @@
 import React, { useState } from 'react';
 import usePost from '../../hooks/usePost';
+import { useNavigate } from 'react-router-dom';
+import Swal from 'sweetalert2';
+
 
 const Login = () => {
   const apiUrl = import.meta.env.VITE_API_URL;
+  const navigate = useNavigate();
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
 
-  console.log(apiUrl);
-  
-
   //Hooks
-  const {postData} = usePost();
+  const { postData } = usePost();
 
-  const handleLogin = async(e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
 
-    const res = await postData(`${apiUrl}/api/login`,{
-      username,
-      password
-    })
-  };
+    try {
+      const res = await postData(`${apiUrl}/api/login`, {
+        username,
+        password,
+      });
 
+
+      if (res && res.message === 'Login successful') {
+        Swal.fire('Success', 'Login Successful!', 'success');
+        navigate(`layout/${res.user.username}/Dashboard`);
+      } else {
+        alert('Login failed');
+      }
+    } catch (error) {
+      console.error(error);
+      alert('An error occurred during login');
+    }
+  };
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-purple-200 via-blue-200 to-indigo-200">
       <div className="w-full max-w-md p-8 bg-white rounded-3xl shadow-2xl border border-gray-100">
