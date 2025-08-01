@@ -14,7 +14,7 @@ const ClaimManage = () => {
 
 
   //Custom Hooks
-  const { data, loading, error } = useFetch(`${apiUrl}/api/getClaim`);
+  const { data, loading, error, refetch } = useFetch(`${apiUrl}/api/getClaim`);
   const { postData } = usePost();
   const { deleteData } = useDelete();
 
@@ -24,20 +24,24 @@ const ClaimManage = () => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    postData(`${apiUrl}/api/addclaim`, form)
+    await postData(`${apiUrl}/api/addclaim`, form);
+    refetch(); // auto-refresh list
     setShowModal(false); // close modal
+    setForm({ name: '', description: '' }); // clear form
   };
+
 
   const handleDelete = async (id) => {
     try {
-      const res = await deleteData(`${apiUrl}/api/deleteClaim/${id}`);
-      console.log(res);
+      await deleteData(`${apiUrl}/api/deleteClaim/${id}`);
+      refetch(); // auto-refresh list
     } catch (err) {
       console.error('Failed to delete:', err);
     }
   };
+
 
   return (
     <div className='p-6'>
