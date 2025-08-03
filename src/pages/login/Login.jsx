@@ -3,37 +3,40 @@ import usePost from '../../hooks/usePost';
 import { useNavigate } from 'react-router-dom';
 import Swal from 'sweetalert2';
 
-
 const Login = () => {
   const apiUrl = import.meta.env.VITE_API_URL;
   const navigate = useNavigate();
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
 
-  //Hooks
   const { postData } = usePost();
 
   const handleLogin = async (e) => {
     e.preventDefault();
-
     try {
       const res = await postData(`${apiUrl}/api/login`, {
         username,
         password,
       });
 
+      if (res.message === 'Login successful!') {
+        const { token, user } = res; // ✅ FIXED: Directly use res.token, res.user
 
-      if (res && res.message === 'Login successful') {
+        localStorage.setItem('authToken', token);
+        localStorage.setItem('username', user.username);
+
         Swal.fire('Success', 'Login Successful!', 'success');
-        navigate(`layout/${res.user.username}/Dashboard`);
+        navigate(`/layout/${user.username}/dashboard`);
       } else {
-        alert('Login failed');
+        Swal.fire('Error', 'Login failed. Please try again.', 'error');
       }
     } catch (error) {
       console.error(error);
-      alert('An error occurred during login');
+      Swal.fire('Error', 'An error occurred during login.', 'error');
     }
   };
+
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-purple-200 via-blue-200 to-indigo-200">
       <div className="w-full max-w-md p-8 bg-white rounded-3xl shadow-2xl border border-gray-100">
@@ -42,47 +45,36 @@ const Login = () => {
         </h2>
 
         <form onSubmit={handleLogin} className="space-y-6">
-          {/* Username Field */}
           <div>
-            <label
-              htmlFor="username"
-              className="block mb-1 text-sm font-semibold text-gray-700"
-            >
+            <label htmlFor="username" className="block mb-1 text-sm font-semibold text-gray-700">
               Username
             </label>
             <input
               type="text"
               id="username"
-              name="username"
               value={username}
               onChange={(e) => setUsername(e.target.value)}
-              placeholder="Enter your username"
+              placeholder='Username'
               required
               className="w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none"
             />
           </div>
 
-          {/* Password Field */}
           <div>
-            <label
-              htmlFor="password"
-              className="block mb-1 text-sm font-semibold text-gray-700"
-            >
+            <label htmlFor="password" className="block mb-1 text-sm font-semibold text-gray-700">
               Password
             </label>
             <input
               type="password"
               id="password"
-              name="password"
               value={password}
+              placeholder='Password'
               onChange={(e) => setPassword(e.target.value)}
-              placeholder="Enter your password"
               required
               className="w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none"
             />
           </div>
 
-          {/* Login Button */}
           <button
             type="submit"
             className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2 rounded-lg shadow-md transition duration-300"

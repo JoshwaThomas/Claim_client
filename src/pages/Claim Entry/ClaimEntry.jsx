@@ -5,7 +5,6 @@ const ClaimEntry = () => {
   const apiUrl = import.meta.env.VITE_API_URL;
 
   const [phoneNumber, setPhoneNumber] = useState('');
-  const [academicYears, setAcademicYears] = useState([]);
   const { data: claimTypes } = useFetch(`${apiUrl}/api/getClaim`);
 
   const [form, setForm] = useState({
@@ -15,12 +14,23 @@ const ClaimEntry = () => {
     department: '',
     designation: '',
     internal_external: '',
+    email: '',
     entry_date: '',
     submission_date: '',
     credited_date: '',
     amount: '',
-    remarks: ''
+    remarks: '',
+    bank_name: '',
+    branch_name: '',
+    branch_code: '',
+    ifsc_code: '',
+    account_no: ''
   });
+
+  useEffect(() => {
+    const today = new Date().toISOString().split('T')[0];
+    setForm((prev) => ({ ...prev, entry_date: today }));
+  }, []);
 
   const handleFetchStaff = async () => {
     if (!phoneNumber) return alert("Enter a phone number");
@@ -35,7 +45,14 @@ const ClaimEntry = () => {
           staff_id: data.staff_id,
           staff_name: data.staff_name,
           department: data.department,
-          designation: data.designation
+          designation: data.designation,
+          internal_external: data.employment_type,
+          email: data.email,
+          bank_name: data.bank_name || '',
+          branch_name: data.branch_name || '',
+          branch_code: data.branch_code || '',
+          ifsc_code: data.ifsc_code || '',
+          account_no: data.bank_acc_no || ''
         }));
       } else {
         alert(data.message || "No staff found");
@@ -47,23 +64,33 @@ const ClaimEntry = () => {
   };
 
   const handleSubmit = (e) => {
-    e.preventDefault(); // Prevent form refresh
-    console.log(form);  // Log form data
+    e.preventDefault();
+    console.log(form); // TODO: Add actual submission logic
+
+    // Preserve claim_type_name, reset everything else
+    setForm(prev => ({
+      claim_type_name: prev.claim_type_name,
+      staff_id: '',
+      staff_name: '',
+      department: '',
+      designation: '',
+      internal_external: '',
+      email: '',
+      entry_date: new Date().toISOString().split('T')[0],
+      submission_date: '',
+      credited_date: '',
+      amount: '',
+      remarks: '',
+      bank_name: '',
+      branch_name: '',
+      branch_code: '',
+      ifsc_code: '',
+      account_no: ''
+    }));
+
+    setPhoneNumber('');
   };
 
-
-  useEffect(() => {
-    const currentYear = new Date().getFullYear();
-    const years = [];
-    for (let y = 2015; y <= currentYear; y++) {
-      years.push(`${y}-${y + 1}`);
-    }
-    setAcademicYears(years.reverse());
-
-    // Set today's date as entry_date
-    const today = new Date().toISOString().slice(0, 10);
-    setForm(prev => ({ ...prev, entry_date: today }));
-  }, []);
 
   return (
     <div className="p-8 max-w-full mx-auto">
@@ -107,63 +134,30 @@ const ClaimEntry = () => {
           </div>
         </div>
 
-        {/* Staff ID */}
-        <div>
-          <label className="text-sm font-semibold text-gray-700">Staff ID</label>
-          <input
-            type="text"
-            value={form.staff_id}
-            readOnly
-            className="mt-2 w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-100"
-          />
-        </div>
-
-        {/* Staff Name */}
-        <div>
-          <label className="text-sm font-semibold text-gray-700">Staff Name</label>
-          <input
-            type="text"
-            value={form.staff_name}
-            readOnly
-            className="mt-2 w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-100"
-          />
-        </div>
-
-        {/* Department */}
-        <div>
-          <label className="text-sm font-semibold text-gray-700">Department</label>
-          <input
-            type="text"
-            value={form.department}
-            readOnly
-            className="mt-2 w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-100"
-          />
-        </div>
-
-        {/* Designation */}
-        <div>
-          <label className="text-sm font-semibold text-gray-700">Designation</label>
-          <input
-            type="text"
-            value={form.designation}
-            readOnly
-            className="mt-2 w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-100"
-          />
-        </div>
-
-        {/* Internal / External */}
-        <div>
-          <label className="text-sm font-semibold text-gray-700">Internal / External</label>
-          <select
-            value={form.internal_external}
-            onChange={(e) => setForm({ ...form, internal_external: e.target.value })}
-            className="mt-2 w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
-          >
-            <option value="">Select</option>
-            <option value="Internal">Internal</option>
-            <option value="External">External</option>
-          </select>
-        </div>
+        {/* Read-only Staff Info */}
+        {[
+          { label: "Staff ID", key: "staff_id" },
+          { label: "Staff Name", key: "staff_name" },
+          { label: "Department", key: "department" },
+          { label: "Designation", key: "designation" },
+          { label: "Internal / External", key: "internal_external" },
+          { label: "Email", key: "email" },
+          { label: "Bank Name", key: "bank_name" },
+          { label: "Branch Name", key: "branch_name" },
+          { label: "Branch Code", key: "branch_code" },
+          { label: "IFSC Code", key: "ifsc_code" },
+          { label: "Account Number", key: "account_no" }
+        ].map(({ label, key }) => (
+          <div key={key}>
+            <label className="text-sm font-semibold text-gray-700">{label}</label>
+            <input
+              type="text"
+              value={form[key]}
+              readOnly
+              className="mt-2 w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-100"
+            />
+          </div>
+        ))}
 
         {/* Entry Date */}
         <div>
@@ -230,7 +224,6 @@ const ClaimEntry = () => {
           </button>
         </div>
       </form>
-
     </div>
   );
 };
