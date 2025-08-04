@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import useFetch from '../../hooks/useFetch';
+import usePost from '../../hooks/usePost';
 
 const ClaimEntry = () => {
   const apiUrl = import.meta.env.VITE_API_URL;
+  const { data: claimTypes } = useFetch(`${apiUrl}/api/getClaim`);
+  const { postData } = usePost();
 
   const [phoneNumber, setPhoneNumber] = useState('');
-  const { data: claimTypes } = useFetch(`${apiUrl}/api/getClaim`);
-
   const [form, setForm] = useState({
     claim_type_name: '',
     staff_id: '',
@@ -14,6 +15,7 @@ const ClaimEntry = () => {
     department: '',
     designation: '',
     internal_external: '',
+    phone_number: '', // ✅ ADD THIS
     email: '',
     entry_date: '',
     submission_date: '',
@@ -47,6 +49,7 @@ const ClaimEntry = () => {
           department: data.department,
           designation: data.designation,
           internal_external: data.employment_type,
+          phone_number: phoneNumber, // ✅ SET phone_number HERE
           email: data.email,
           bank_name: data.bank_name || '',
           branch_name: data.branch_name || '',
@@ -58,39 +61,43 @@ const ClaimEntry = () => {
         alert(data.message || "No staff found");
       }
     } catch (err) {
-      alert("Failed to fetch staff");
       console.error(err);
+      alert("Failed to fetch staff");
     }
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log(form); // TODO: Add actual submission logic
+    try {
+      await postData(`${apiUrl}/api/postClaim`, form);
+      alert("Claim submitted successfully");
 
-    // Preserve claim_type_name, reset everything else
-    setForm(prev => ({
-      claim_type_name: prev.claim_type_name,
-      staff_id: '',
-      staff_name: '',
-      department: '',
-      designation: '',
-      internal_external: '',
-      email: '',
-      entry_date: new Date().toISOString().split('T')[0],
-      submission_date: '',
-      credited_date: '',
-      amount: '',
-      remarks: '',
-      bank_name: '',
-      branch_name: '',
-      branch_code: '',
-      ifsc_code: '',
-      account_no: ''
-    }));
+      setForm({
+        claim_type_name: form.claim_type_name,
+        staff_id: '',
+        staff_name: '',
+        department: '',
+        designation: '',
+        internal_external: '',
+        phone_number: '', // ✅ RESET IT HERE
+        email: '',
+        entry_date: new Date().toISOString().split('T')[0],
+        submission_date: '',
+        credited_date: '',
+        amount: '',
+        remarks: '',
+        bank_name: '',
+        branch_name: '',
+        branch_code: '',
+        ifsc_code: '',
+        account_no: ''
+      });
 
-    setPhoneNumber('');
+      setPhoneNumber('');
+    } catch (err) {
+      alert("Failed to submit claim");
+    }
   };
-
 
   return (
     <div className="p-8 max-w-full mx-auto">
@@ -104,7 +111,7 @@ const ClaimEntry = () => {
           <select
             value={form.claim_type_name}
             onChange={(e) => setForm({ ...form, claim_type_name: e.target.value })}
-            className="mt-2 w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
+            className="mt-2 w-full px-4 py-2 border border-gray-300 rounded-lg"
           >
             <option value="">Select Type</option>
             {claimTypes?.map((c) => (
@@ -113,7 +120,7 @@ const ClaimEntry = () => {
           </select>
         </div>
 
-        {/* Phone Number */}
+        {/* Phone Number & Fetch */}
         <div>
           <label className="text-sm font-semibold text-gray-700">Phone Number</label>
           <div className="mt-2 flex gap-2">
@@ -122,19 +129,19 @@ const ClaimEntry = () => {
               value={phoneNumber}
               onChange={(e) => setPhoneNumber(e.target.value)}
               placeholder="Enter Phone Number"
-              className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
+              className="flex-1 px-4 py-2 border border-gray-300 rounded-lg"
             />
             <button
               type="button"
               onClick={handleFetchStaff}
-              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
+              className="px-4 py-2 bg-blue-600 text-white rounded-lg"
             >
               Get
             </button>
           </div>
         </div>
 
-        {/* Read-only Staff Info */}
+        {/* Staff Info (Read Only) */}
         {[
           { label: "Staff ID", key: "staff_id" },
           { label: "Staff Name", key: "staff_name" },
@@ -154,7 +161,7 @@ const ClaimEntry = () => {
               type="text"
               value={form[key]}
               readOnly
-              className="mt-2 w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-100"
+              className="mt-2 w-full px-4 py-2 border border-gray-300 bg-gray-100 rounded-lg"
             />
           </div>
         ))}
@@ -166,7 +173,7 @@ const ClaimEntry = () => {
             type="date"
             value={form.entry_date}
             readOnly
-            className="mt-2 w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-100"
+            className="mt-2 w-full px-4 py-2 border border-gray-300 bg-gray-100 rounded-lg"
           />
         </div>
 
@@ -177,7 +184,7 @@ const ClaimEntry = () => {
             type="date"
             value={form.submission_date}
             onChange={(e) => setForm({ ...form, submission_date: e.target.value })}
-            className="mt-2 w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
+            className="mt-2 w-full px-4 py-2 border border-gray-300 rounded-lg"
           />
         </div>
 
@@ -188,7 +195,7 @@ const ClaimEntry = () => {
             type="date"
             value={form.credited_date}
             onChange={(e) => setForm({ ...form, credited_date: e.target.value })}
-            className="mt-2 w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
+            className="mt-2 w-full px-4 py-2 border border-gray-300 rounded-lg"
           />
         </div>
 
@@ -199,7 +206,7 @@ const ClaimEntry = () => {
             type="number"
             value={form.amount}
             onChange={(e) => setForm({ ...form, amount: e.target.value })}
-            className="mt-2 w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
+            className="mt-2 w-full px-4 py-2 border border-gray-300 rounded-lg"
           />
         </div>
 
@@ -207,10 +214,10 @@ const ClaimEntry = () => {
         <div className="md:col-span-2">
           <label className="text-sm font-semibold text-gray-700">Remarks</label>
           <textarea
-            rows="3"
             value={form.remarks}
             onChange={(e) => setForm({ ...form, remarks: e.target.value })}
-            className="mt-2 w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
+            rows="3"
+            className="mt-2 w-full px-4 py-2 border border-gray-300 rounded-lg"
           />
         </div>
 
@@ -218,7 +225,7 @@ const ClaimEntry = () => {
         <div className="md:col-span-2 text-right">
           <button
             type="submit"
-            className="mt-4 px-6 py-2 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition"
+            className="mt-4 px-6 py-2 bg-blue-600 text-white font-medium rounded-lg"
           >
             Submit
           </button>
