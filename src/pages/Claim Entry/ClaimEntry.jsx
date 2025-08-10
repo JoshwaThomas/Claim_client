@@ -1,6 +1,10 @@
 import React, { useState, useEffect } from 'react';
+import axios from 'axios';
 import useFetch from '../../hooks/useFetch';
 import usePost from '../../hooks/usePost';
+import QpsFields from './QpsFields';
+import CiaReapear from './CiaReapear';
+import ScrutinyField from './ScrutinyField';
 
 const ClaimEntry = () => {
   const apiUrl = import.meta.env.VITE_API_URL;
@@ -15,7 +19,7 @@ const ClaimEntry = () => {
     department: '',
     designation: '',
     internal_external: '',
-    phone_number: '', // ✅ ADD THIS
+    phone_number: '',
     email: '',
     entry_date: '',
     submission_date: '',
@@ -26,14 +30,124 @@ const ClaimEntry = () => {
     branch_name: '',
     branch_code: '',
     ifsc_code: '',
-    account_no: ''
+    account_no: '',
+    qps_level: '',       // ✅ Add this for UG/PG
+    no_of_qps: '',        // ✅ Add this for no. of QPS
+
+    // ✅ For SCRUTINY CLAIM
+    scrutiny_level: '',           // UG or PG
+    scrutiny_no_of_papers: '',
+    scrutiny_days: ''
   });
 
+
+  useEffect(() => {
+    const fetchAmount = async () => {
+      const {
+        claim_type_name,
+        qps_level,
+        no_of_qps,
+        no_of_papers,
+        scrutiny_level,
+        scrutiny_no_of_papers,
+        scrutiny_days
+      } = form;
+
+      // QPS logic
+      if (
+        claim_type_name === "QPS" &&
+        qps_level &&
+        no_of_qps &&
+        !isNaN(no_of_qps)
+      ) {
+        try {
+          const response = await axios.post(`${apiUrl}/api/calculateAmount`, {
+            claim_type_name,
+            qps_level,
+            no_of_qps: parseInt(no_of_qps),
+          });
+
+          const { amount } = response.data;
+          if (amount !== undefined) {
+            setForm((prev) => ({ ...prev, amount: amount.toString() }));
+          }
+        } catch (error) {
+          console.error("Error calculating QPS amount:", error.message);
+        }
+      }
+
+      // CIA Reappear logic
+      if (
+        claim_type_name === "CIA REAPEAR CLAIM" &&
+        no_of_papers &&
+        !isNaN(no_of_papers)
+      ) {
+        try {
+          const response = await axios.post(`${apiUrl}/api/calculateAmount`, {
+            claim_type_name,
+            no_of_papers: parseInt(no_of_papers),
+          });
+
+          const { amount } = response.data;
+          if (amount !== undefined) {
+            setForm((prev) => ({ ...prev, amount: amount.toString() }));
+          }
+        } catch (error) {
+          console.error("Error calculating CIA amount:", error.message);
+        }
+      }
+
+      // Scrutiny logic
+      if (
+        claim_type_name === "SCRUTINY CLAIM" &&
+        scrutiny_level &&
+        scrutiny_no_of_papers &&
+        scrutiny_days &&
+        !isNaN(scrutiny_no_of_papers) &&
+        !isNaN(scrutiny_days)
+      ) {
+        try {
+          const response = await axios.post(`${apiUrl}/api/calculateAmount`, {
+            claim_type_name,
+            scrutiny_level,
+            scrutiny_no_of_papers: parseInt(scrutiny_no_of_papers),
+            scrutiny_days: parseInt(scrutiny_days),
+          });
+
+          const { amount } = response.data;
+          if (amount !== undefined) {
+            setForm((prev) => ({ ...prev, amount: amount.toString() }));
+          }
+        } catch (error) {
+          console.error("Error calculating Scrutiny amount:", error.message);
+        }
+      }
+    };
+
+    fetchAmount();
+  }, [
+    form.claim_type_name,
+    form.qps_level,
+    form.no_of_qps,
+    form.no_of_papers,
+    form.scrutiny_level,
+    form.scrutiny_no_of_papers,
+    form.scrutiny_days
+  ]);
+
+
+
+
+
+
+  //today date
   useEffect(() => {
     const today = new Date().toISOString().split('T')[0];
     setForm((prev) => ({ ...prev, entry_date: today }));
   }, []);
 
+
+  //fetch Staff by using phone Number
   const handleFetchStaff = async () => {
     if (!phoneNumber) return alert("Enter a phone number");
 
@@ -66,6 +180,7 @@ const ClaimEntry = () => {
     }
   };
 
+  //Submit the Claim data
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
@@ -119,6 +234,9 @@ const ClaimEntry = () => {
             ))}
           </select>
         </div>
+
+
+
 
         {/* Phone Number & Fetch */}
         <div>
@@ -199,16 +317,30 @@ const ClaimEntry = () => {
           />
         </div>
 
+
+        {form.claim_type_name === "QPS" && (
+          <QpsFields form={form} setForm={setForm} />
+        )}
+
+        {form.claim_type_name === "CIA REAPEAR CLAIM" && (
+          <CiaReapear form={form} setForm={setForm} />
+        )}
+
+        {form.claim_type_name === "SCRUTINY CLAIM" && (
+          <ScrutinyField form={form} setForm={setForm} />
+        )}
+
         {/* Amount */}
         <div>
           <label className="text-sm font-semibold text-gray-700">Amount</label>
           <input
             type="number"
             value={form.amount}
-            onChange={(e) => setForm({ ...form, amount: e.target.value })}
-            className="mt-2 w-full px-4 py-2 border border-gray-300 rounded-lg"
+            readOnly={form.claim_type_name === "QPS"} // ✅ Prevent manual edits for QPS
+            className={`mt-2 w-full px-4 py-2 border border-gray-300 rounded-lg ${form.claim_type_name === "QPS" ? 'bg-gray-100' : ''}`}
           />
         </div>
+
 
         {/* Remarks */}
         <div className="md:col-span-2">
