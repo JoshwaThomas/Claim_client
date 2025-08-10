@@ -47,7 +47,14 @@ const ClaimManage = () => {
       ? `${apiUrl}/api/updateClaim/${editingId}`
       : `${apiUrl}/api/addclaim`;
 
-    await postData(endpoint, form);
+    const payload = editingId
+      ? form
+      : {
+          name: form.name,
+          description: form.description
+        };
+
+    await postData(endpoint, payload);
     refetch();
     setShowModal(false);
     setEditingId(null);
@@ -105,7 +112,7 @@ const ClaimManage = () => {
                 cia_rate: ''
               }
             });
-            setEditingId(null); // ✅ Clear edit mode
+            setEditingId(null);
             setShowModal(true);
           }}
         >
@@ -137,10 +144,10 @@ const ClaimManage = () => {
                   <td className="px-6 py-4 text-xs">
                     {claim.amount_settings
                       ? Object.entries(claim.amount_settings).map(([key, val]) => (
-                        <div key={key}>
-                          <span className="font-semibold">{key.replace(/_/g, ' ')}:</span> ₹{val}
-                        </div>
-                      ))
+                          <div key={key}>
+                            <span className="font-semibold">{key.replace(/_/g, ' ')}:</span> ₹{val}
+                          </div>
+                        ))
                       : <span className="text-gray-400">No settings</span>}
                   </td>
                   <td className="px-6 py-4 flex gap-2">
@@ -207,23 +214,25 @@ const ClaimManage = () => {
                 ></textarea>
               </div>
 
-              {/* Amount Settings */}
-              <div className="grid grid-cols-2 gap-4">
-                {Object.entries(form.amount_settings).map(([key, value]) => (
-                  <div key={key}>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      {key.replace(/_/g, ' ').toUpperCase()}
-                    </label>
-                    <input
-                      type="number"
-                      name={key}
-                      value={value}
-                      onChange={handleAmountChange}
-                      className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    />
-                  </div>
-                ))}
-              </div>
+              {/* Amount Settings (only for edit) */}
+              {editingId && (
+                <div className="grid grid-cols-2 gap-4">
+                  {Object.entries(form.amount_settings).map(([key, value]) => (
+                    <div key={key}>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        {key.replace(/_/g, ' ').toUpperCase()}
+                      </label>
+                      <input
+                        type="number"
+                        name={key}
+                        value={value}
+                        onChange={handleAmountChange}
+                        className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      />
+                    </div>
+                  ))}
+                </div>
+              )}
 
               {/* Buttons */}
               <div className="flex justify-end gap-3">

@@ -336,7 +336,7 @@ const ClaimEntry = () => {
           <input
             type="number"
             value={form.amount}
-            readOnly={form.claim_type_name === "QPS"} // ✅ Prevent manual edits for QPS
+            onChange={(e) => setForm({ ...form, amount: e.target.value })}
             className={`mt-2 w-full px-4 py-2 border border-gray-300 rounded-lg ${form.claim_type_name === "QPS" ? 'bg-gray-100' : ''}`}
           />
         </div>
