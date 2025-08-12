@@ -3,6 +3,7 @@ import ClaimCard from '../../components/dashboard/ClaimCard';
 import ClaimSummaryTable from '../../components/dashboard/ClaimTable';
 import ClaimPieChart from '../../components/dashboard/ClaimPieChart';
 import useFetch from '../../hooks/useFetch';
+import StaffOverviewCard from '../../components/dashboard/StaffOverviewCard';
 
 const Dashboard = () => {
 
@@ -10,6 +11,7 @@ const Dashboard = () => {
 
   //hooks 
   const { data } = useFetch(`${apiUrl}/api/totalclaimscount`)
+  const { data: staffOverview } = useFetch(`${apiUrl}/api/staffoverview`)
   return (
     <div className="space-y-8 p-4">
       {/* Claim Summary Cards */}
@@ -41,6 +43,12 @@ const Dashboard = () => {
           color="red"
           showAlert={true}
         />
+        {/* <StaffOverviewCard
+          internalCount={456}
+          externalCount={78} /> */}
+          <StaffOverviewCard internalCount={560} externalCount={175} />
+
+
       </div>
 
       {/* Claim Summary Table (Full Width) */}

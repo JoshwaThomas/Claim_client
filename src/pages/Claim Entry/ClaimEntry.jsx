@@ -5,6 +5,7 @@ import usePost from '../../hooks/usePost';
 import QpsFields from './QpsFields';
 import CiaReapear from './CiaReapear';
 import ScrutinyField from './ScrutinyField';
+import CentralValuation from './CentralValuation';
 
 const ClaimEntry = () => {
   const apiUrl = import.meta.env.VITE_API_URL;
@@ -50,7 +51,11 @@ const ClaimEntry = () => {
         no_of_papers,
         scrutiny_level,
         scrutiny_no_of_papers,
-        scrutiny_days
+        scrutiny_days,
+        central_total_scripts_ug_pg,
+        central_days_halted,
+        central_travel_allowance,
+        central_tax_applicable
       } = form;
 
       // QPS logic
@@ -122,6 +127,35 @@ const ClaimEntry = () => {
           console.error("Error calculating Scrutiny amount:", error.message);
         }
       }
+
+      // ✅ Central Valuation logic
+      if (
+        claim_type_name === "CENTRAL VALUATION" &&
+        central_total_scripts_ug_pg &&
+        central_days_halted &&
+        central_travel_allowance &&
+        central_tax_applicable && // ensure tax type is selected
+        !isNaN(central_total_scripts_ug_pg) &&
+        !isNaN(central_days_halted) &&
+        !isNaN(central_travel_allowance)
+      ) {
+        try {
+          const response = await axios.post(`${apiUrl}/api/calculateAmount`, {
+            claim_type_name,
+            total_scripts: parseInt(central_total_scripts_ug_pg),
+            days_halted: parseInt(central_days_halted),
+            travel_allowance: parseFloat(central_travel_allowance),
+            tax_applicable: central_tax_applicable // only "AIDED" or "SF"
+          });
+
+          const { amount } = response.data;
+          if (amount !== undefined) {
+            setForm((prev) => ({ ...prev, amount: amount.toString() }));
+          }
+        } catch (error) {
+          console.error("Error calculating Central Valuation amount:", error.message);
+        }
+      }
     };
 
     fetchAmount();
@@ -132,7 +166,11 @@ const ClaimEntry = () => {
     form.no_of_papers,
     form.scrutiny_level,
     form.scrutiny_no_of_papers,
-    form.scrutiny_days
+    form.scrutiny_days,
+    form.central_total_scripts_ug_pg,
+    form.central_days_halted,
+    form.central_travel_allowance,
+    form.central_tax_applicable
   ]);
 
 
@@ -329,6 +367,11 @@ const ClaimEntry = () => {
         {form.claim_type_name === "SCRUTINY CLAIM" && (
           <ScrutinyField form={form} setForm={setForm} />
         )}
+
+        {form.claim_type_name === "CENTRAL VALUATION" && (
+          <CentralValuation form={form} setForm={setForm} />
+        )}
+
 
         {/* Amount */}
         <div>
