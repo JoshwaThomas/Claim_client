@@ -14,7 +14,7 @@ const StaffManage = () => {
   const [showModal, setShowModal] = useState(false);
   const [editingStaff, setEditingStaff] = useState(null);
   const [formData, setFormData] = useState({
-    staff_id: '', staff_name: '', department: '', designation: '',
+    staff_id: '', staff_name: '', department: '', category: '', designation: '',
     phone_no: '', email: '', bank_acc_no: '',
     ifsc_code: '', employment_type: '', bank_name: '', branch_name: '', branch_code: ''
   });
@@ -175,7 +175,7 @@ const StaffManage = () => {
         <table className="w-full text-sm text-center">
           <thead className="bg-purple-900 h-16 text-white">
             <tr>
-              {['Staff Id', 'Name', 'Dept', 'Designation', 'Phone', 'Email', 'Bank Acc', 'IFSC', 'Emp Type', 'Action'].map((h, i) => (
+              {['Staff Id', 'Name', 'Dept', 'Designation', 'Category', 'Phone', 'Email', 'Bank Acc', 'IFSC', 'Emp Type', 'Action'].map((h, i) => (
                 <th key={i} className="px-2 py-2 border font-bold">{h}</th>
               ))}
             </tr>
@@ -187,6 +187,7 @@ const StaffManage = () => {
                 <td className="border px-2 py-2">{s.staff_name}</td>
                 <td className="border px-2 py-2">{s.department}</td>
                 <td className="border px-2 py-2">{s.designation}</td>
+                <td className="border px-2 py-2">{s.category}</td>
                 <td className="border px-2 py-2">{s.phone_no}</td>
                 <td className="border px-2 py-2">{s.email}</td>
                 <td className="border px-2 py-2">{s.bank_acc_no}</td>
@@ -244,19 +245,45 @@ const StaffManage = () => {
 
       {/* Modal */}
       {showModal && (
-        <div className="fixed inset-0 bg-white bg-opacity-100 flex justify-center items-center z-50">
-          <div className="bg-white p-6 rounded-lg w-full max-w-md shadow-lg border">
-            <h2 className="text-xl mb-4 font-bold">{editingStaff ? "Edit Staff" : "Add Staff"}</h2>
-            <form onSubmit={handleSubmitForm} className="grid grid-cols-1 gap-3">
-              {['staff_id', 'staff_name', 'department', 'designation', 'phone_no', 'email', 'bank_acc_no', 'ifsc_code', 'employment_type', 'bank_name', 'branch_name', 'branch_code'].map((field) => (
-                <input key={field} type="text" placeholder={field.replace('_', ' ')} required
-                  value={formData[field] || ''}
-                  onChange={e => setFormData({ ...formData, [field]: e.target.value })}
-                  className="border p-2 rounded" />
+        <div className="fixed inset-0 bg-white bg-opacity-80 flex justify-center items-center z-50">
+          <div className="bg-white p-6 rounded-lg w-full max-w-3xl shadow-lg border">
+            <h2 className="text-2xl mb-6 font-bold border-b pb-2">
+              {editingStaff ? "Edit Staff" : "Add Staff"}
+            </h2>
+            <form onSubmit={handleSubmitForm} className="grid grid-cols-2 gap-4">
+              {[
+                'staff_id', 'staff_name', 'department', 'designation', 'category',
+                'phone_no', 'email', 'bank_acc_no', 'ifsc_code',
+                'employment_type', 'bank_name', 'branch_name', 'branch_code'
+              ].map((field) => (
+                <div key={field} className="flex flex-col">
+                  <label className="mb-1 font-medium capitalize">
+                    {field.replace(/_/g, ' ')}
+                  </label>
+                  <input
+                    type="text"
+                    placeholder={field.replace(/_/g, ' ')}
+                    required
+                    value={formData[field] || ''}
+                    onChange={e => setFormData({ ...formData, [field]: e.target.value })}
+                    className="border p-2 rounded"
+                  />
+                </div>
               ))}
-              <div className="flex justify-end gap-2">
-                <button type="button" onClick={() => setShowModal(false)} className="bg-gray-300 px-4 py-2 rounded">Cancel</button>
-                <button type="submit" className="bg-green-600 text-white px-4 py-2 rounded">Submit</button>
+              <div className="col-span-2 flex justify-end gap-3 mt-4">
+                <button
+                  type="button"
+                  onClick={() => setShowModal(false)}
+                  className="bg-gray-300 px-4 py-2 rounded hover:bg-gray-400 transition"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 transition"
+                >
+                  Submit
+                </button>
               </div>
             </form>
           </div>
