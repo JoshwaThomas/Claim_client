@@ -6,6 +6,9 @@ import QpsFields from './QpsFields';
 import CiaReapear from './CiaReapear';
 import ScrutinyField from './ScrutinyField';
 import CentralValuation from './CentralValuation';
+import PracticalClaim from './PracticalFields';
+import PracticalFields from './PracticalFields';
+import AbilityEnhancementClaim from './AbilityEnhancementClaim';
 
 const ClaimEntry = () => {
   const apiUrl = import.meta.env.VITE_API_URL;
@@ -14,6 +17,7 @@ const ClaimEntry = () => {
 
   const [phoneNumber, setPhoneNumber] = useState('');
   const [form, setForm] = useState({
+    // 🔷 General Claim Info
     claim_type_name: '',
     staff_id: '',
     staff_name: '',
@@ -32,22 +36,48 @@ const ClaimEntry = () => {
     branch_code: '',
     ifsc_code: '',
     account_no: '',
-    qps_level: '',       // ✅ Add this for UG/PG
-    no_of_qps: '',        // ✅ Add this for no. of QPS
 
-    // ✅ For SCRUTINY CLAIM
-    scrutiny_level: '',           // UG or PG
-    scrutiny_no_of_papers: '',
-    scrutiny_days: ''
+    // 🔷 QPS Claim
+    no_of_qps_ug: '',
+    no_of_qps_pg: '',
+    no_of_scheme: '',        // No. of Scheme
+
+    // 🔷 Scrutiny Claim
+    scrutiny_level: '',           // UG / PG
+    scrutiny_no_of_papers: '',    // No. of Papers
+    scrutiny_days: '',            // No. of Days Halted
+
+    // 🔷 Practical Exam Claim
+    qps_paper_setting: '',        // QPS Paper Setting
+    total_students: '',           // Total No. of Students
+    days_halted: '',              // No. of Days Halted
+    travelling_allowance: '',     // Travelling Allowance
+    degree_level: '', // UG / PG for Practical Exam Claim
+    tax_type: '',                 // Dropdown: Aided / SF / AICTE
+    tax_amount: '',               // Optional Tax Amount
+
+    // 🔷 Central Valuation Claim
+    central_role: '',                 // Chairman / Examiner
+    central_total_scripts_ug_pg: '', // Total Scripts
+    central_days_halted: '',         // No. of Days Halted
+    central_travel_allowance: '',    // Travel Allowance
+    central_tax_applicable: '',      // Tax Type (Aided / SF)
+
+    // 🔷 Ability Enhancement Claim ✅
+    ability_total_no_students: '',     // Total No. of Students
+    ability_no_of_days_halted: '',     // No. of Days Halted
+    ability_tax_type: '',              // Aided / AICTE only
   });
+
 
 
   useEffect(() => {
     const fetchAmount = async () => {
       const {
         claim_type_name,
-        qps_level,
-        no_of_qps,
+        no_of_qps_pg,
+        no_of_qps_ug,
+        no_of_scheme,
         no_of_papers,
         scrutiny_level,
         scrutiny_no_of_papers,
@@ -55,21 +85,26 @@ const ClaimEntry = () => {
         central_total_scripts_ug_pg,
         central_days_halted,
         central_travel_allowance,
-        central_tax_applicable
+        central_tax_applicable,
+        qps_paper_setting,
+        total_students,
+        days_halted,
+        travelling_allowance,
+        tax_type,
+        degree_level
       } = form;
 
       // QPS logic
       if (
         claim_type_name === "QPS" &&
-        qps_level &&
-        no_of_qps &&
-        !isNaN(no_of_qps)
+        (!isNaN(parseInt(form.no_of_qps_ug)) || !isNaN(parseInt(form.no_of_qps_pg)) || !isNaN(parseInt(form.no_of_scheme)))
       ) {
         try {
           const response = await axios.post(`${apiUrl}/api/calculateAmount`, {
             claim_type_name,
-            qps_level,
-            no_of_qps: parseInt(no_of_qps),
+            no_of_qps_ug: parseInt(form.no_of_qps_ug) || 0,
+            no_of_qps_pg: parseInt(form.no_of_qps_pg) || 0,
+            no_of_scheme: parseInt(form.no_of_scheme) || 0,
           });
 
           const { amount } = response.data;
@@ -80,6 +115,8 @@ const ClaimEntry = () => {
           console.error("Error calculating QPS amount:", error.message);
         }
       }
+
+
 
       // CIA Reappear logic
       if (
@@ -156,13 +193,46 @@ const ClaimEntry = () => {
           console.error("Error calculating Central Valuation amount:", error.message);
         }
       }
+
+      // Practical Exam Claim logic
+      if (
+        claim_type_name === "PRACTICAL EXAM CLAIM" &&
+        qps_paper_setting &&
+        total_students &&
+        days_halted &&
+        travelling_allowance &&
+        tax_type &&
+        degree_level &&
+        !isNaN(total_students) &&
+        !isNaN(days_halted) &&
+        !isNaN(travelling_allowance)
+      ) {
+        try {
+          const response = await axios.post(`${apiUrl}/api/calculateAmount`, {
+            claim_type_name,
+            no_of_qps: parseInt(qps_paper_setting),
+            total_no_student: parseInt(total_students),
+            no_of_days_halted: parseInt(days_halted),
+            tax_applicable: tax_type,
+            degree_level
+          });
+
+          const { amount } = response.data;
+          if (amount !== undefined) {
+            setForm((prev) => ({ ...prev, amount: amount.toString() }));
+          }
+        } catch (error) {
+          console.error("Error calculating Practical Exam amount:", error.message);
+        }
+      }
     };
 
     fetchAmount();
   }, [
     form.claim_type_name,
-    form.qps_level,
-    form.no_of_qps,
+    form.no_of_qps_ug,
+    form.no_of_qps_pg,
+    form.no_of_scheme,
     form.no_of_papers,
     form.scrutiny_level,
     form.scrutiny_no_of_papers,
@@ -170,9 +240,14 @@ const ClaimEntry = () => {
     form.central_total_scripts_ug_pg,
     form.central_days_halted,
     form.central_travel_allowance,
-    form.central_tax_applicable
+    form.central_tax_applicable,
+    form.qps_paper_setting,       // ✅ Added
+    form.total_students,          // ✅ Added
+    form.days_halted,             // ✅ Added
+    form.travelling_allowance,    // ✅ Added
+    form.tax_type,                // ✅ Added
+    form.degree_level             // ✅ Added
   ]);
-
 
 
 
@@ -273,9 +348,6 @@ const ClaimEntry = () => {
           </select>
         </div>
 
-
-
-
         {/* Phone Number & Fetch */}
         <div>
           <label className="text-sm font-semibold text-gray-700">Phone Number</label>
@@ -285,7 +357,7 @@ const ClaimEntry = () => {
               value={phoneNumber}
               onChange={(e) => setPhoneNumber(e.target.value)}
               placeholder="Enter Phone Number"
-              className="flex-1 px-4 py-2 border border-gray-300 rounded-lg"
+              className="flex-1 px-4 py-2 border font-semibold border-gray-300 rounded-lg"
             />
             <button
               type="button"
@@ -317,8 +389,7 @@ const ClaimEntry = () => {
               type="text"
               value={form[key]}
               readOnly
-              className="mt-2 w-full px-4 py-2 border border-gray-300 bg-gray-100 rounded-lg"
-            />
+              className="mt-2 w-full px-4 py-2 border border-gray-300 bg-gray-100 rounded-lg font-semibold text-gray-800" />
           </div>
         ))}
 
@@ -372,12 +443,22 @@ const ClaimEntry = () => {
           <CentralValuation form={form} setForm={setForm} />
         )}
 
+        {form.claim_type_name === "PRACTICAL EXAM CLAIM" && (
+          <PracticalFields form={form} setForm={setForm} />
+        )}
+
+        {form.claim_type_name === "ABILITY ENHANCEMENT CLAIM" && (
+          <AbilityEnhancementClaim form={form} setForm={setForm} />
+
+        )}
+
 
         {/* Amount */}
         <div>
           <label className="text-sm font-semibold text-gray-700">Amount</label>
           <input
             type="number"
+            autoComplete="off"
             value={form.amount}
             onChange={(e) => setForm({ ...form, amount: e.target.value })}
             className={`mt-2 w-full px-4 py-2 border border-gray-300 rounded-lg ${form.claim_type_name === "QPS" ? 'bg-gray-100' : ''}`}
