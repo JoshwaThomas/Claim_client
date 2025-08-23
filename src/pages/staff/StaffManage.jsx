@@ -15,7 +15,7 @@ const StaffManage = () => {
   const [editingStaff, setEditingStaff] = useState(null);
   const [formData, setFormData] = useState({
     staff_id: '', staff_name: '', department: '', category: '', designation: '',
-    phone_no: '', email: '', bank_acc_no: '',
+    phone_no: '', email: '',college:'', bank_acc_no: '',
     ifsc_code: '', employment_type: '', bank_name: '', branch_name: '', branch_code: ''
   });
 
@@ -175,7 +175,7 @@ const StaffManage = () => {
         <table className="w-full text-sm text-center">
           <thead className="bg-purple-900 h-16 text-white">
             <tr>
-              {['Staff Id', 'Name', 'Dept', 'Designation', 'Category', 'Phone', 'Email', 'Bank Acc', 'IFSC', 'Emp Type', 'Action'].map((h, i) => (
+              {['Staff Id', 'Name', 'Dept', 'Designation', 'Category', 'Phone', 'Email', 'College','Bank Acc', 'IFSC', 'Emp Type', 'Action'].map((h, i) => (
                 <th key={i} className="px-2 py-2 border font-bold">{h}</th>
               ))}
             </tr>
@@ -190,6 +190,7 @@ const StaffManage = () => {
                 <td className="border px-2 py-2">{s.category}</td>
                 <td className="border px-2 py-2">{s.phone_no}</td>
                 <td className="border px-2 py-2">{s.email}</td>
+                <td className="border px-2 py-2">{s.college}</td>
                 <td className="border px-2 py-2">{s.bank_acc_no}</td>
                 <td className="border px-2 py-2">{s.ifsc_code}</td>
                 <td className="border px-2 py-2">{s.employment_type}</td>
@@ -253,7 +254,7 @@ const StaffManage = () => {
             <form onSubmit={handleSubmitForm} className="grid grid-cols-2 gap-4">
               {[
                 'staff_id', 'staff_name', 'department', 'designation', 'category',
-                'phone_no', 'email', 'bank_acc_no', 'ifsc_code',
+                'phone_no', 'email','college', 'bank_acc_no', 'ifsc_code',
                 'employment_type', 'bank_name', 'branch_name', 'branch_code'
               ].map((field) => (
                 <div key={field} className="flex flex-col">
