@@ -9,6 +9,7 @@ import CentralValuation from './CentralValuation';
 import PracticalClaim from './PracticalFields';
 import PracticalFields from './PracticalFields';
 import AbilityEnhancementClaim from './AbilityEnhancementClaim';
+import SkilledClaim from './SkilledClaim';
 
 const ClaimEntry = () => {
   const apiUrl = import.meta.env.VITE_API_URL;
@@ -91,7 +92,10 @@ const ClaimEntry = () => {
         days_halted,
         travelling_allowance,
         tax_type,
-        degree_level
+        degree_level,
+        ability_no_of_days_halted,
+        ability_tax_type,
+        ability_total_no_students
       } = form;
 
       // QPS logic
@@ -225,6 +229,32 @@ const ClaimEntry = () => {
           console.error("Error calculating Practical Exam amount:", error.message);
         }
       }
+
+      // Ability Enhancement Claim logic
+      if (
+        claim_type_name === "ABILITY ENHANCEMENT CLAIM" &&
+        form.ability_total_no_students &&
+        form.ability_no_of_days_halted &&
+        !isNaN(form.ability_total_no_students) &&
+        !isNaN(form.ability_no_of_days_halted)
+      ) {
+        try {
+          const response = await axios.post(`${apiUrl}/api/calculateAmount`, {
+            claim_type_name,
+            ability_total_no_students: parseInt(form.ability_total_no_students),
+            ability_no_of_days_halted: parseInt(form.ability_no_of_days_halted),
+            ability_tax_type: form.ability_tax_type || ''
+          });
+
+          const { amount } = response.data;
+          if (amount !== undefined) {
+            setForm((prev) => ({ ...prev, amount: amount.toString() }));
+          }
+        } catch (error) {
+          console.error("Error calculating Ability Enhancement amount:", error.message);
+        }
+      }
+
     };
 
     fetchAmount();
@@ -246,7 +276,11 @@ const ClaimEntry = () => {
     form.days_halted,             // ✅ Added
     form.travelling_allowance,    // ✅ Added
     form.tax_type,                // ✅ Added
-    form.degree_level             // ✅ Added
+    form.degree_level,             // ✅ Added
+    form.ability_no_of_days_halted,
+    form.ability_total_no_students,
+    form.ability_tax_type
+
   ]);
 
 
@@ -405,7 +439,7 @@ const ClaimEntry = () => {
         </div>
 
         {/* Submission Date */}
-        <div>
+        {/* <div>
           <label className="text-sm font-semibold text-gray-700">Submission Date</label>
           <input
             type="date"
@@ -413,10 +447,10 @@ const ClaimEntry = () => {
             onChange={(e) => setForm({ ...form, submission_date: e.target.value })}
             className="mt-2 w-full px-4 py-2 border border-gray-300 rounded-lg"
           />
-        </div>
+        </div> */}
 
         {/* Credited Date */}
-        <div>
+        {/* <div>
           <label className="text-sm font-semibold text-gray-700">Credited Date</label>
           <input
             type="date"
@@ -424,7 +458,7 @@ const ClaimEntry = () => {
             onChange={(e) => setForm({ ...form, credited_date: e.target.value })}
             className="mt-2 w-full px-4 py-2 border border-gray-300 rounded-lg"
           />
-        </div>
+        </div> */}
 
 
         {form.claim_type_name === "QPS" && (
@@ -449,6 +483,11 @@ const ClaimEntry = () => {
 
         {form.claim_type_name === "ABILITY ENHANCEMENT CLAIM" && (
           <AbilityEnhancementClaim form={form} setForm={setForm} />
+
+        )}
+
+        {form.claim_type_name === "SKILLED CLAIM" && (
+          <SkilledClaim form={form} setForm={setForm} />
 
         )}
 

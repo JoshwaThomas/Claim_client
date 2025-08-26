@@ -46,7 +46,7 @@ const Dashboard = () => {
         {/* <StaffOverviewCard
           internalCount={456}
           externalCount={78} /> */}
-          <StaffOverviewCard internalCount={560} externalCount={175} />
+          {/* <StaffOverviewCard internal={560} external={175} /> */}
 
 
       </div>

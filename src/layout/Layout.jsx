@@ -17,7 +17,8 @@ const Layout = () => {
 
   const [openSettings, setOpenSettings] = useState(false);
 
-  const sidebarMenu = [
+  // Full menu list
+  const fullMenu = [
     {
       name: 'Dashboard',
       path: `/layout/${username}/dashboard`,
@@ -50,8 +51,7 @@ const Layout = () => {
         {
           name: 'Add User',
           path: `/layout/${username}/settings/adduser`
-        },
-        // Add more submenus here
+        }
       ]
     },
     {
@@ -60,6 +60,28 @@ const Layout = () => {
       icon: <IoIosLogOut />
     }
   ];
+
+  // Finance-specific menu
+  const financeMenu = [
+    {
+      name: 'Dashboard',
+      path: `/layout/${username}/dashboard`,
+      icon: <FaTachometerAlt />
+    },
+    {
+      name: 'Payment Processing',
+      path: `/layout/${username}/paymentprocessing`,
+      icon: <FaFileInvoiceDollar />
+    },
+    {
+      name: 'Logout',
+      path: '/',
+      icon: <IoIosLogOut />
+    }
+  ];
+
+  // Choose menu based on role
+  const sidebarMenu = username === 'fadmin' ? financeMenu : fullMenu;
 
   return (
     <div className="relative min-h-screen">
@@ -91,11 +113,10 @@ const Layout = () => {
                         <Link
                           key={subIndex}
                           to={sub.path}
-                          className={`block px-3 py-2 rounded-md text-sm transition duration-200 ${
-                            location.pathname === sub.path
+                          className={`block px-3 py-2 rounded-md text-sm transition duration-200 ${location.pathname === sub.path
                               ? 'bg-blue-100 text-blue-700 font-medium'
                               : 'text-gray-700 hover:bg-gray-200 hover:text-blue-600'
-                          }`}
+                            }`}
                         >
                           {sub.name}
                         </Link>
@@ -110,11 +131,10 @@ const Layout = () => {
               <Link
                 key={index}
                 to={item.path}
-                className={`flex items-center gap-3 px-4 py-2 rounded-md transition duration-200 ${
-                  location.pathname === item.path
+                className={`flex items-center gap-3 px-4 py-2 rounded-md transition duration-200 ${location.pathname === item.path
                     ? 'bg-blue-100 text-blue-700 font-semibold'
                     : 'text-gray-700 hover:bg-gray-200 hover:text-blue-600'
-                }`}
+                  }`}
               >
                 <span className="text-lg">{item.icon}</span>
                 <span>{item.name}</span>

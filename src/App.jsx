@@ -9,6 +9,7 @@ import ClaimManage from './pages/ClaimManage/ClaimManage';
 import ClaimReport from './pages/Claim Report/ClaimReport';
 import ProtectedRoute from './components/ProtectedRoute';
 import AddUser from './pages/Settings/AddUser';
+import PaymentProcess from './pages/PaymentProcessing/PaymentProcess';
 
 const App = () => {
   return (
@@ -30,6 +31,7 @@ const App = () => {
           <Route path="claimmanage" element={<ClaimManage />} />
           <Route path="claimreport" element={<ClaimReport />} />
           <Route path="settings/adduser" element={<AddUser />} />
+          <Route path="paymentprocessing" element={<PaymentProcess />} />
         </Route>
       </Routes>
     </BrowserRouter>

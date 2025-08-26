@@ -1,34 +1,32 @@
 import React from 'react';
 import { FaUserTie, FaUsers } from 'react-icons/fa';
 
-const StaffOverviewCard = ({ internalCount = 0, externalCount = 0 }) => {
+const StaffOverviewCard = ({ internal = 0, external = 0 }) => {
   return (
-    <div className="bg-white/30 backdrop-blur-md rounded-3xl p-6 shadow-xl ring-1 ring-gray-300 transition-all duration-300 hover:scale-[1.02] hover:shadow-2xl">
-      {/* Title */}
-      <h3 className="text-2xl font-bold text-gray-800 mb-6 tracking-tight">Staff Overview</h3>
+    <div className="bg-white/60 backdrop-blur-md rounded-xl p-4 shadow-md border border-gray-200">
+      <h4 className="text-lg font-semibold text-gray-800 mb-3 tracking-tight">Staff Breakdown</h4>
 
-      {/* Grid Layout */}
-      <div className="grid grid-cols-2 gap-6">
+      <div className="space-y-3">
         {/* Internal Staff */}
-        <div className="flex items-center gap-4">
-          <div className="bg-blue-100 p-4 rounded-full shadow-md">
-            <FaUserTie className="text-2xl text-blue-700" />
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="bg-blue-100 p-2 rounded-full shadow-sm">
+              <FaUserTie className="text-blue-700 text-lg" />
+            </div>
+            <span className="text-sm text-gray-700">Internal Staff</span>
           </div>
-          <div>
-            <p className="text-sm text-gray-500">Internal Staff</p>
-            <p className="text-xl font-semibold text-gray-800">{internalCount}</p>
-          </div>
+          <span className="text-sm font-bold text-gray-900">{internal}</span>
         </div>
 
         {/* External Staff */}
-        <div className="flex items-center gap-4">
-          <div className="bg-green-100 p-4 rounded-full shadow-md">
-            <FaUsers className="text-2xl text-green-700" />
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="bg-green-100 p-2 rounded-full shadow-sm">
+              <FaUsers className="text-green-700 text-lg" />
+            </div>
+            <span className="text-sm text-gray-700">External Staff</span>
           </div>
-          <div>
-            <p className="text-sm text-gray-500">External Staff</p>
-            <p className="text-xl font-semibold text-gray-800">{externalCount}</p>
-          </div>
+          <span className="text-sm font-bold text-gray-900">{external}</span>
         </div>
       </div>
     </div>
