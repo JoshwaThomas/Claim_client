@@ -57,6 +57,10 @@ const ClaimEntry = () => {
     tax_type: '',                 // Dropdown: Aided / SF / AICTE
     tax_amount: '',               // Optional Tax Amount
 
+    // 🔷 CIA Reappear Claim
+    cia_no_of_papers: '',
+    cia_role_type: '',
+
     // 🔷 Central Valuation Claim
     central_role: '',                 // Chairman / Examiner
     central_total_scripts_ug_pg: '', // Total Scripts
@@ -124,14 +128,16 @@ const ClaimEntry = () => {
 
       // CIA Reappear logic
       if (
-        claim_type_name === "CIA REAPEAR CLAIM" &&
-        no_of_papers &&
-        !isNaN(no_of_papers)
+        form.claim_type_name === "CIA REAPEAR CLAIM" &&
+        form.cia_no_of_papers &&
+        !isNaN(form.cia_no_of_papers) &&
+        form.cia_role_type
       ) {
         try {
           const response = await axios.post(`${apiUrl}/api/calculateAmount`, {
-            claim_type_name,
-            no_of_papers: parseInt(no_of_papers),
+            claim_type_name: form.claim_type_name,
+            no_of_papers: parseInt(form.cia_no_of_papers),
+            role_type: form.cia_role_type,
           });
 
           const { amount } = response.data;
@@ -142,6 +148,7 @@ const ClaimEntry = () => {
           console.error("Error calculating CIA amount:", error.message);
         }
       }
+
 
       // Scrutiny logic
       if (
@@ -279,7 +286,9 @@ const ClaimEntry = () => {
     form.degree_level,             // ✅ Added
     form.ability_no_of_days_halted,
     form.ability_total_no_students,
-    form.ability_tax_type
+    form.ability_tax_type,
+    form.cia_no_of_papers,
+    form.cia_role_type
 
   ]);
 
@@ -468,6 +477,7 @@ const ClaimEntry = () => {
         {form.claim_type_name === "CIA REAPEAR CLAIM" && (
           <CiaReapear form={form} setForm={setForm} />
         )}
+
 
         {form.claim_type_name === "SCRUTINY CLAIM" && (
           <ScrutinyField form={form} setForm={setForm} />

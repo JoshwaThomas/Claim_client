@@ -105,7 +105,7 @@ const PaymentProcess = () => {
                   {claims.map((claim, index) => (
                     <tr key={claim._id} className={index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
                       <td className="px-4 py-2">{claim.staff_name}</td>
-                      <td className="px-4 py-2">{claim.claim_type}</td>
+                      <td className="px-4 py-2">{claim.claim_type_name}</td>
                       <td className="px-4 py-2">₹{claim.amount}</td>
                       <td className="px-4 py-2">
                         {new Date(claim.submission_date).toLocaleDateString()}

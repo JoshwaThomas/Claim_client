@@ -3,20 +3,26 @@ import useFetch from '../../hooks/useFetch';
 
 const ClaimReport = () => {
   const [filter, setFilter] = useState('all');
+  const [claimTypeFilter, setClaimTypeFilter] = useState('');
+  const [claimTypes, setClaimTypes] = useState([]);
+
   const apiUrl = import.meta.env.VITE_API_URL;
   const { data: claimData, loading, error } = useFetch(`${apiUrl}/api/getclaimEntry`);
 
   // Extended filter logic
   const filteredClaims = claimData?.filter((claim) => {
+    const isUnsubmitted = !claim.submission_date;
+    const matchesClaimType = claim.claim_type_name?.toLowerCase().includes(claimTypeFilter.toLowerCase());
+
     switch (filter) {
       case 'submitted':
         return claim.submission_date;
       case 'unsubmitted':
-        return !claim.submission_date;
+        return isUnsubmitted && matchesClaimType;
       case 'credited':
         return claim.credited_date;
       default:
-        return true; // 'all'
+        return true;
     }
   });
 
@@ -40,6 +46,19 @@ const ClaimReport = () => {
         ))}
       </div>
 
+      {/* Claim Type Filter */}
+      {filter === 'unsubmitted' && (
+        <div className="mb-4 flex justify-center gap-4 flex-wrap">
+          <input
+            type="text"
+            placeholder="Filter by Claim Type"
+            className="border px-4 py-2 rounded w-64"
+            value={claimTypeFilter}
+            onChange={(e) => setClaimTypeFilter(e.target.value)}
+          />
+        </div>
+      )}
+
       {/* Table */}
       {loading ? (
         <p className="text-blue-600 text-center">Loading...</p>
@@ -58,7 +77,7 @@ const ClaimReport = () => {
                 <th className="text-left p-3 font-semibold text-sm text-white">Submission Date</th>
                 <th className="text-left p-3 font-semibold text-sm text-white">Credited Date</th>
                 <th className="text-left p-3 font-semibold text-sm text-white">Status</th>
-                <th className="text-left p-3 font-semibold text-sm text-white">Payement Id</th>
+                <th className="text-left p-3 font-semibold text-sm text-white">Payment ID</th>
               </tr>
             </thead>
             <tbody>
@@ -80,16 +99,25 @@ const ClaimReport = () => {
                   <td className="p-3 text-sm font-semibold text-gray-600">
                     {claim.credited_date ? new Date(claim.credited_date).toLocaleDateString('en-GB') : '-'}
                   </td>
-                  <td className="p-3 text-sm font-semibold text-gray-800">{claim.status}</td>
+                  <td className="p-3 text-sm font-semibold">
+                    {claim.status === 'Submitted to Principal' ? (
+                      <span className="text-blue-600 bg-blue-100 px-2 py-1 rounded">Submitted</span>
+                    ) : claim.status === 'Credited' ? (
+                      <span className="text-green-700 bg-green-100 px-2 py-1 rounded">Credited</span>
+                    ) : claim.status === 'Pending' ? (
+                      <span className="text-red-700 bg-red-100 px-2 py-1 rounded">Pending</span>
+                    ) : (
+                      <span className="text-gray-700">{claim.status}</span>
+                    )}
+                  </td>
+
+
                   <td className="p-3 text-sm font-semibold text-gray-800">{claim.payment_report_id}</td>
-
-
                 </tr>
-
               ))}
               {filteredClaims?.length === 0 && (
                 <tr>
-                  <td colSpan="7" className="p-4 text-center text-gray-500">
+                  <td colSpan="9" className="p-4 text-center text-gray-500">
                     No claim entries found.
                   </td>
                 </tr>
@@ -97,26 +125,39 @@ const ClaimReport = () => {
             </tbody>
           </table>
 
+          {/* Submit & Download Button */}
           {filter === 'unsubmitted' && filteredClaims?.length > 0 && (
             <div className="mb-4 text-center">
               <button
                 className="bg-blue-700 text-white px-4 py-2 rounded hover:bg-blue-800 transition"
                 onClick={async () => {
                   try {
-                    const res = await fetch(`${apiUrl}/api/submitClaims`, { method: 'PUT' });
+                    const res = await fetch(`${apiUrl}/api/submitFilteredClaims`, {
+                      method: 'PUT',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({ claimIds: filteredClaims.map((c) => c._id) })
+                    });
                     const result = await res.json();
+
+                    const pdfRes = await fetch(`${apiUrl}/api/downloadSubmittedClaims/${result.paymentReportId}`);
+                    const blob = await pdfRes.blob();
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `ClaimReport_${result.paymentReportId}.pdf`;
+                    a.click();
+
                     alert(result.message);
-                    window.location.reload(); // or refetch via useFetch if you want smoother UX
+                    window.location.reload();
                   } catch (err) {
-                    alert('Failed to submit claims');
+                    alert('Failed to submit and download claims');
                   }
                 }}
               >
-                Submit All Unsubmitted Claims
+                Submit & Download Filtered Claims
               </button>
             </div>
           )}
-
         </div>
       )}
     </div>
