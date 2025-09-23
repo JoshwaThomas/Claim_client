@@ -13,7 +13,7 @@ const ClaimReport = () => {
 
   const claimTypes = [...new Set(claimData?.map((claim) => claim.claim_type_name))];
 
-  // Apply filters
+  // Core filtered claims for table
   const filteredClaims = claimData?.filter((claim) => {
     switch (filter) {
       case 'submitted':
@@ -31,106 +31,36 @@ const ClaimReport = () => {
     if (claimType !== 'all' && claim.claim_type_name !== claimType) return false;
     if (entryDate && new Date(claim.entry_date).toLocaleDateString('en-CA') !== entryDate) return false;
     return true;
-  });
+  }) || [];
 
-  // Check if already submitted claims exist in current filtered set
-  const submittedClaims = claimData?.filter((claim) =>
-    claim.submission_date && 
-    (claimType === 'all' || claim.claim_type_name === claimType) &&
-    (entryDate ? new Date(claim.entry_date).toLocaleDateString('en-CA') === entryDate : true) &&
-    (filter === 'submitted' || filter === 'all')
-  );
-
-  // Extract existing PR ID & submission date for submitted claims (assumes all have same PR ID)
-  const existingPrId = submittedClaims && submittedClaims.length > 0 ? submittedClaims[0].payment_report_id : '';
-  const existingSubmissionDate = submittedClaims && submittedClaims.length > 0 
-    ? new Date(submittedClaims[0].submission_date).toLocaleDateString('en-GB') 
-    : '';
-
-  // Single button handler for submit and download
-  const handleSubmitAndDownloadPDF = async () => {
-    setIsSubmitting(true);
-    try {
-      // Only submit if there are unsubmitted claims
-      if (filteredClaims.length === 0) {
-        alert('No unsubmitted claims to submit.');
-        setIsSubmitting(false);
-        return;
-      }
-
-      // Call backend to submit unsubmitted claims
-      const submitRes = await fetch(`${apiUrl}/api/submitClaims`, { method: 'PUT' });
-
-      if (submitRes.ok) {
-        const result = await submitRes.json();
-        const prId = result.prId || existingPrId || `PR-${new Date().getFullYear()}-000`; // fallback
-        const actualSubmittedDate = result.submission_date || new Date().toLocaleDateString('en-GB');
-
-        // Refresh data to get updated claims
-        if (refetch) await refetch();
-
-        // After refresh, reconstruct filtered claims to pass updated data
-        const updatedClaims = claimData?.filter((claim) => {
-          switch (filter) {
-            case 'submitted':
-              if (!claim.submission_date) return false;
-              break;
-            case 'unsubmitted':
-              if (claim.submission_date) return false;
-              break;
-            case 'credited':
-              if (!claim.credited_date) return false;
-              break;
-            default:
-              break;
-          }
-          if (claimType !== 'all' && claim.claim_type_name !== claimType) return false;
-          if (entryDate && new Date(claim.entry_date).toLocaleDateString('en-CA') !== entryDate) return false;
-          return true;
-        }) || [];
-
-        createPDF(prId, actualSubmittedDate, updatedClaims);
-      } else {
-        const result = await submitRes.json();
-        alert(result.message || 'Failed to submit claims.');
-      }
-    } catch (err) {
-      alert('Failed to submit claims.');
-    }
-    setIsSubmitting(false);
-  };
-
-  // Download PDF without submitting again (reuses existing PR ID)
-  const handleDownloadExistingPDF = () => {
-    if (!existingPrId) {
-      alert('No submitted claims available to download PDF.');
+  // Handler for download filtered claims when filter === 'all'
+  const handleDownloadClaimTypePDF = () => {
+    // Collect claims matching claimType dropdown and entryDate filter
+    const selectedClaims = (claimData || []).filter((claim) =>
+      (claimType === 'all' || claim.claim_type_name === claimType) &&
+      (entryDate ? new Date(claim.entry_date).toLocaleDateString('en-CA') === entryDate : true)
+    );
+    if (selectedClaims.length === 0) {
+      alert('No claims found to download.');
       return;
     }
-
-    const submittedFilteredClaims = claimData?.filter((claim) =>
-      claim.payment_report_id === existingPrId
-    ) || [];
-
-    createPDF(existingPrId, existingSubmissionDate, submittedFilteredClaims);
+    // Use PR ID/submission date from first result, fallback to something generic
+    const prId = selectedClaims[0]?.payment_report_id || `PR-${new Date().getFullYear()}-000`;
+    const submissionDate = selectedClaims[0]?.submission_date
+      ? new Date(selectedClaims[0].submission_date).toLocaleDateString('en-GB')
+      : new Date().toLocaleDateString('en-GB');
+    createPDF(prId, submissionDate, selectedClaims);
   };
 
-  // PDF generator
+  // PDF creator (unchanged)
   const createPDF = (prId, submittedDate, claims) => {
     const doc = new jsPDF();
     doc.setFontSize(22);
     doc.text(`Claims Report - ${prId}`, 14, 12);
     doc.setFontSize(14);
-
     const tableColumn = [
-      "Sno",
-      "Claim Type",
-      "Staff Name",
-      "Amount",
-      "Entry Date",
-      "Submission Date",
-      "Credited Date",
-      "Status",
-      "Payment Id"
+      "Sno", "Claim Type", "Staff Name", "Amount", "Entry Date", "Submission Date",
+      "Credited Date", "Status", "Payment Id"
     ];
     const tableRows = claims?.map((claim, index) => [
       index + 1,
@@ -145,13 +75,76 @@ const ClaimReport = () => {
     ]);
 
     autoTable(doc, {
-    head: [tableColumn],
-    body: tableRows,
-    startY: 28,
-    styles: { fontSize: 8 }, // Increase table font size here
-    headStyles: { fontSize: 10 }, // Bigger font for header row
-  });
+      head: [tableColumn],
+      body: tableRows,
+      startY: 28,
+      styles: { fontSize: 8 },
+      headStyles: { fontSize: 10 },
+    });
     doc.save(`ClaimEntryReport_${prId}.pdf`);
+  };
+
+  const handleSubmitAndDownloadPDF = async () => {
+    setIsSubmitting(true);
+    try {
+      if (filteredClaims.length === 0) {
+        alert('No unsubmitted claims to submit.');
+        setIsSubmitting(false);
+        return;
+      }
+
+      // Send claimType as body param
+      const submitRes = await fetch(`${apiUrl}/api/submitClaims`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ claimType })
+      });
+
+      if (submitRes.ok) {
+        const result = await submitRes.json();
+        const prId = result.prId || existingPrId || `PR-${new Date().getFullYear()}-000`;
+        const getDateOnlyString = (dateStr) => {
+          const d = new Date(dateStr);
+          return d.toLocaleDateString('en-GB'); // DD/MM/YYYY format without time
+        };
+
+        const actualSubmittedDate = result.submission_date
+          ? getDateOnlyString(result.submission_date)
+          : getDateOnlyString(new Date());
+
+
+        if (refetch) await refetch();
+
+        // After refetch, use updated filtered claims JUST for selected claim type
+        const updatedClaims = (claimData || []).filter((claim) => {
+          if (claimType !== 'all' && claim.claim_type_name !== claimType) return false;
+          if (filter === 'unsubmitted' && claim.submission_date) return false;
+          if (entryDate && new Date(claim.entry_date).toLocaleDateString('en-CA') !== entryDate) return false;
+          return true;
+        });
+
+        createPDF(prId, actualSubmittedDate, updatedClaims);
+      } else {
+        const result = await submitRes.json();
+        alert(result.message || 'Failed to submit claims.');
+      }
+    } catch (err) {
+      alert('Failed to submit claims.');
+    }
+    setIsSubmitting(false);
+  };
+
+  // Downloads PDF only for currently shown submitted claims (filtered by claimType)
+  const handleDownloadExistingPDF = () => {
+    if (!existingPrId) {
+      alert('No submitted claims available to download PDF.');
+      return;
+    }
+    const submittedFilteredClaims = (claimData || []).filter((claim) =>
+      claim.payment_report_id === existingPrId &&
+      (claimType === 'all' || claim.claim_type_name === claimType)
+    );
+    createPDF(existingPrId, existingSubmissionDate, submittedFilteredClaims);
   };
 
 
@@ -192,25 +185,34 @@ const ClaimReport = () => {
           className="border border-gray-300 rounded px-3 py-2"
         />
       </div>
-
+      {/* Only show Download PDF button when radio 'All' is selected */}
+      <div className='-mt-16'>
+        {filter === 'all' && (
+          <div className="text-center flex justify-end">
+            <button
+              className="bg-green-700 text-white px-4 py-2 rounded hover:bg-green-800 transition"
+              onClick={handleDownloadClaimTypePDF}
+              disabled={isSubmitting}
+            >
+              Download PDF
+            </button>
+          </div>
+        )}
+      </div>
       {/* Table */}
-      <div className="overflow-x-auto shadow-md rounded-lg border border-gray-200">
+      <h1 className='text-lg font-bold text-end mt-4'>No.of.Claims : {filteredClaims.length} </h1>
+      <div className="overflow-x-auto shadow-md rounded-lg border border-gray-200 mt-5">
         <table className="min-w-full bg-white">
           <thead className="bg-blue-950 border-b-2 border-gray-300">
             <tr>
-              <th className="text-left p-3 font-semibold text-sm text-white">#</th>
-              <th className="text-left p-3 font-semibold text-sm text-white">Claim Type</th>
-              <th className="text-left p-3 font-semibold text-sm text-white">Staff Name</th>
-              <th className="text-left p-3 font-semibold text-sm text-white">Amount</th>
-              <th className="text-left p-3 font-semibold text-sm text-white">Entry Date</th>
-              <th className="text-left p-3 font-semibold text-sm text-white">Submission Date</th>
-              <th className="text-left p-3 font-semibold text-sm text-white">Credited Date</th>
-              <th className="text-left p-3 font-semibold text-sm text-white">Status</th>
-              <th className="text-left p-3 font-semibold text-sm text-white">Payment Id</th>
+              {["S.No", "Claim Type", "Staff Name", "Amount", "Entry Date", "Submission Date", "Credited Date", "Status", "Payment Id"]
+                .map(h => (
+                  <th key={h} className="text-left p-3 font-semibold text-sm text-white">{h}</th>
+                ))}
             </tr>
           </thead>
           <tbody>
-            {filteredClaims?.map((claim, index) => (
+            {filteredClaims.map((claim, index) => (
               <tr
                 key={claim._id}
                 className={index % 2 === 0 ? 'bg-gray-50 hover:bg-gray-100' : 'bg-white hover:bg-gray-100'}
@@ -232,7 +234,7 @@ const ClaimReport = () => {
                 <td className="p-3 text-sm font-semibold text-gray-800">{claim.payment_report_id}</td>
               </tr>
             ))}
-            {filteredClaims?.length === 0 && (
+            {filteredClaims.length === 0 && (
               <tr>
                 <td colSpan="9" className="p-4 text-center text-gray-500">
                   No claim entries found.
@@ -244,7 +246,7 @@ const ClaimReport = () => {
       </div>
 
       {/* Buttons */}
-      {filter === 'unsubmitted' && filteredClaims?.length > 0 && (
+      {filter === 'unsubmitted' && filteredClaims.length > 0 && (
         <div className="mt-5 text-center flex justify-end">
           <button
             className="bg-blue-700 text-white px-4 py-2 rounded hover:bg-blue-800 transition"
@@ -256,18 +258,8 @@ const ClaimReport = () => {
         </div>
       )}
 
-      {/* Show Download button if there are submitted claims */}
-      {(filter === 'submitted' || filter === 'all') && existingPrId && (
-        <div className="mt-5 text-center flex justify-end">
-          <button
-            className="bg-green-700 text-white px-4 py-2 rounded hover:bg-green-800 transition"
-            onClick={handleDownloadExistingPDF}
-            disabled={isSubmitting}
-          >
-            Download PDF
-          </button>
-        </div>
-      )}
+
+
     </div>
   );
 };

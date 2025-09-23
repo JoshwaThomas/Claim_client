@@ -15,12 +15,12 @@ const StaffManage = () => {
   const [editingStaff, setEditingStaff] = useState(null);
   const [formData, setFormData] = useState({
     staff_id: '', staff_name: '', department: '', category: '', designation: '',
-    phone_no: '', email: '',college:'', bank_acc_no: '',
+    phone_no: '', email: '', college: '', bank_acc_no: '',
     ifsc_code: '', employment_type: '', bank_name: '', branch_name: '', branch_code: ''
   });
 
   const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage, setItemsPerPage] = useState(25);
+  const itemsPerPage = 100; // Fixed items per page
 
   const fetchStaff = async () => {
     try {
@@ -107,54 +107,94 @@ const StaffManage = () => {
     return [...new Set(values)];
   };
 
-  const paginatedStaff = staffList.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
   const totalPages = Math.ceil(staffList.length / itemsPerPage);
+  const paginatedStaff = staffList.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
+
+  const goToNextPage = () => {
+    if (currentPage < totalPages) setCurrentPage(currentPage + 1);
+  };
+
+  const goToPrevPage = () => {
+    if (currentPage > 1) setCurrentPage(currentPage - 1);
+  };
+
+  const startItem = staffList.length === 0 ? 0 : (currentPage - 1) * itemsPerPage + 1;
+  const endItem = Math.min(currentPage * itemsPerPage, staffList.length);
 
   return (
     <div className="max-w-full mx-auto px-4">
       <h1 className="text-3xl font-bold text-center my-6 text-green-800">Staff Management Portal</h1>
-      {/* Search & Upload */}
-      <div className="flex flex-col sm:flex-row flex-wrap gap-4 mb-6 justify-between items-center">
-        <input
-          type="text"
-          placeholder="Search by name, email or phone"
-          className="p-2 border rounded w-full sm:w-1/3"
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-        />
-        <div className='border w-[400px]'>
-          <input
-            type="file"
-            accept=".xlsx,.xls"
-            onChange={e => setExcelFile(e.target.files[0])}
-            className="file:bg-green-200 file:text-green-800 file:px-4 file:py-2 file:rounded-lg text-sm text-gray-600"
-          />
-          <button onClick={handleFileUpload} className="bg-green-600 hover:bg-green-700 text-white font-semibold px-6 py-2 rounded-lg transition">
-            Upload Excel
-          </button>
+
+      {/* Clean & Spacious Controls Section */}
+      <div className="bg-white border border-gray-200 rounded-xl shadow-md p-6 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+
+
+          {/* Filter Dropdowns */}
+          {['department', 'designation', 'employment_type'].map(field => (
+            <div key={field}>
+              <label className="block text-sm font-semibold text-gray-700 mb-2 capitalize">
+                {field.replace('_', ' ')}
+              </label>
+              <select
+                className={`w-full border rounded-lg px-3 py-2 text-sm focus:outline-none transition ${filters[field] ? 'border-green-500 bg-green-50' : 'border-gray-300'
+                  }`}
+                value={filters[field]}
+                onChange={e => setFilters({ ...filters, [field]: e.target.value })}
+              >
+                <option value="">All {field.replace('_', ' ')}</option>
+                {getUniqueValues(field).map((val, i) => (
+                  <option key={i} value={val}>{val}</option>
+                ))}
+              </select>
+            </div>
+          ))}
+
+          {/* Upload Excel */}
+          <div className="col-span-1 md:col-span-2 lg:col-span-3 flex flex-col sm:flex-row items-start gap-6 mt-4">
+            {/* Search Input */}
+            <div className='w-92'>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">🔍 Search Staff</label>
+              <input
+                type="text"
+                placeholder="Search"
+                value={searchQuery}
+                onChange={e => setSearchQuery(e.target.value)}
+                className="w-full border border-gray-300 rounded-lg px-4 py-2  text-sm focus:outline-none focus:ring-2 focus:ring-green-500 transition"
+              />
+            </div>
+            <div className="border rounded-md border-gray-300 flex items-center gap-3 mt-7">
+              <input
+                type="file"
+                accept=".xlsx,.xls"
+                onChange={e => setExcelFile(e.target.files[0])}
+                className="file:bg-green-100 file:text-green-800 file:px-4 file:py-1.5 file:rounded-lg text-sm text-gray-600"
+              />
+              <button
+                onClick={handleFileUpload}
+                className="bg-green-600 hover:bg-green-700 text-white font-semibold px-5 py-1.5 rounded-lg transition"
+              >
+                Upload Excel
+              </button>
+            </div>
+
+            <button
+              onClick={() => {
+                setFilters({ department: '', designation: '', employment_type: '' });
+                setSearchQuery('');
+              }}
+              className="text-sm text-gray-600 hover:text-red-600 underline transition mt-6"
+            >
+              🔄 Reset Filters
+            </button>
+          </div>
         </div>
-        <button onClick={() => { setFormData({}); setEditingStaff(null); setShowModal(true); }}
-          className="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-6 py-2 rounded-lg transition">
-          Add Staff
-        </button>
       </div>
 
-      {/* Filters */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
-        {['department', 'designation', 'employment_type'].map(field => (
-          <select key={field}
-            className="p-2 border rounded"
-            value={filters[field]}
-            onChange={e => setFilters({ ...filters, [field]: e.target.value })}>
-            <option value="">All {field.replace('_', ' ')}</option>
-            {getUniqueValues(field).map((val, i) => (
-              <option key={i} value={val}>{val}</option>
-            ))}
-          </select>
-        ))}
-      </div>
 
-      <div className='flex justify-end'>
+
+      <div className='flex justify-between'>
+        {/* Download Excel */}
         <button
           className="bg-green-600 text-white font-bold px-4 py-2 rounded hover:bg-green-700 cursor-pointer"
           onClick={() => {
@@ -168,79 +208,94 @@ const StaffManage = () => {
         >
           Download Excel
         </button>
+        <button
+          onClick={() => { setFormData({}); setEditingStaff(null); setShowModal(true); }}
+          className="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-6 py-2 rounded-lg"
+        >
+          Add Staff
+        </button>
       </div>
 
-      {/* Staff Table */}
-      <div className="overflow-auto bg-white rounded-lg shadow mt-3">
-        <table className="w-full text-sm text-center">
-          <thead className="bg-purple-900 h-16 text-white">
+
+      <h1 className='text-lg font-bold text-end mt-5'>No.of.Staffs : {staffList.length}</h1>
+      {/* Table container with scroll */}
+      <div className="overflow-auto border border-gray-300 rounded shadow max-h-[600px] max-w-full mt-5">
+        <table className="w-full text-sm text-center border-collapse border border-gray-300 min-w-[900px]">
+          <thead className="bg-purple-900 h-14 text-white sticky top-0 z-10">
             <tr>
-              {['Staff Id', 'Name', 'Dept', 'Designation', 'Category', 'Phone', 'Email', 'College','Bank Acc', 'IFSC', 'Emp Type', 'Action'].map((h, i) => (
-                <th key={i} className="px-2 py-2 border font-bold">{h}</th>
+              {['S.No', 'Staff Id', 'Name', 'Dept', 'Designation', 'Category', 'Phone', 'Email', 'College', 'Bank Acc', 'IFSC', 'Emp Type', 'Action'].map((h, i) => (
+                <th key={i} className="px-2 py-2 border border-gray-300 font-bold whitespace-nowrap">
+                  {h}
+                </th>
               ))}
             </tr>
           </thead>
           <tbody>
             {paginatedStaff.map((s, i) => (
-              <tr key={i} className="hover:bg-purple-50 font-bold">
-                <td className="border px-2 py-2">{s.staff_id}</td>
-                <td className="border px-2 py-2">{s.staff_name}</td>
-                <td className="border px-2 py-2">{s.department}</td>
-                <td className="border px-2 py-2">{s.designation}</td>
-                <td className="border px-2 py-2">{s.category}</td>
-                <td className="border px-2 py-2">{s.phone_no}</td>
-                <td className="border px-2 py-2">{s.email}</td>
-                <td className="border px-2 py-2">{s.college}</td>
-                <td className="border px-2 py-2">{s.bank_acc_no}</td>
-                <td className="border px-2 py-2">{s.ifsc_code}</td>
-                <td className="border px-2 py-2">{s.employment_type}</td>
-                {/* <td className="border px-2 py-2">{s.bank_name}</td> */}
-                <td className="border-b px-2 py-3 flex justify-center items-center gap-2">
-                  <button
-                    onClick={() => openEditModal(s)}
-                    className="bg-green-600 hover:bg-green-700 text-white font-bold px-4 py-2 rounded transition">
-                    Edit
-                  </button>
-                  <button
-                    onClick={() => handleDelete(s.staff_id)}
-                    className="bg-red-600 hover:bg-red-700 text-white font-bold px-4 py-2 rounded transition">
-                    Delete
-                  </button>
+              <tr key={i} className="hover:bg-purple-50 font-semibold">
+                <td className="border border-gray-300 px-2 py-2">{startItem + i}</td>
+                <td className="border border-gray-300 px-2 py-2">{s.staff_id}</td>
+                <td className="border border-gray-300 px-2 py-2 text-left">{s.staff_name}</td>
+                <td className="border border-gray-300 px-2 py-2">{s.department}</td>
+                <td className="border border-gray-300 px-2 py-2">{s.designation}</td>
+                <td className="border border-gray-300 px-2 py-2">{s.category}</td>
+                <td className="border border-gray-300 px-2 py-2">{s.phone_no}</td>
+                <td className="border border-gray-300 px-2 py-2 text-left">{s.email}</td>
+                <td className="border border-gray-300 px-2 py-2">{s.college}</td>
+                <td className="border border-gray-300 px-2 py-2">{s.bank_acc_no}</td>
+                <td className="border border-gray-300 px-2 py-2">{s.ifsc_code}</td>
+                <td className="border border-gray-300 px-2 py-2">{s.employment_type}</td>
+                <td className="border border-gray-300 px-2 py-2 ">
+                  <div className='flex justify-center items-center gap-2'>
+                    <button
+                      onClick={() => openEditModal(s)}
+                      className="bg-green-600 hover:bg-green-700 text-white font-bold px-5 py-3 rounded transition"
+                      title="Edit"
+                    >
+                      Edit
+                    </button>
+                    <button
+                      onClick={() => handleDelete(s.staff_id)}
+                      className="bg-red-600 hover:bg-red-700 text-white font-bold px-4 py-3 rounded transition"
+                      title="Delete"
+                    >
+                      Delete
+                    </button>
+                  </div>
                 </td>
               </tr>
             ))}
             {paginatedStaff.length === 0 && (
-              <tr><td colSpan="11" className="py-4 text-gray-500">No data found.</td></tr>
+              <tr>
+                <td colSpan="13" className="py-6 text-gray-500 text-center font-semibold">
+                  No data found.
+                </td>
+              </tr>
             )}
           </tbody>
         </table>
       </div>
-
-      {/* Pagination & Page Size */}
-      <div className="flex items-center justify-between mt-4">
-        <div>
-          <label className="mr-2 text-sm font-medium">Items per page:</label>
-          <select
-            value={itemsPerPage}
-            onChange={(e) => { setItemsPerPage(Number(e.target.value)); setCurrentPage(1); }}
-            className="border rounded p-1 text-sm"
-          >
-            {[25, 50, 75, 100].map((count) => (
-              <option key={count} value={count}>{count}</option>
-            ))}
-          </select>
+      <div className='flex justify-end gap-5'>
+        {/* Showing range */}
+        <div className="mt-5 font-semibold text-right text-gray-700">
+          Showing {startItem} - {endItem} of {staffList.length} entries
         </div>
-
-        <div className="flex space-x-2">
-          {[...Array(totalPages)].map((_, i) => (
-            <button
-              key={i}
-              onClick={() => setCurrentPage(i + 1)}
-              className={`px-3 py-1 rounded ${currentPage === i + 1 ? 'bg-green-600 text-white' : 'bg-gray-200'}`}
-            >
-              {i + 1}
-            </button>
-          ))}
+        {/* Pagination buttons */}
+        <div className="flex justify-end gap-3 mt-4">
+          <button
+            onClick={goToPrevPage}
+            disabled={currentPage === 1}
+            className={`px-4 py-2 rounded ${currentPage === 1 ? 'bg-gray-300 cursor-not-allowed' : 'bg-green-600 text-white hover:bg-green-700'}`}
+          >
+            Previous
+          </button>
+          <button
+            onClick={goToNextPage}
+            disabled={currentPage === totalPages || totalPages === 0}
+            className={`px-4 py-2 rounded ${currentPage === totalPages || totalPages === 0 ? 'bg-gray-300 cursor-not-allowed' : 'bg-green-600 text-white hover:bg-green-700'}`}
+          >
+            Next
+          </button>
         </div>
       </div>
 
@@ -254,7 +309,7 @@ const StaffManage = () => {
             <form onSubmit={handleSubmitForm} className="grid grid-cols-2 gap-4">
               {[
                 'staff_id', 'staff_name', 'department', 'designation', 'category',
-                'phone_no', 'email','college', 'bank_acc_no', 'ifsc_code',
+                'phone_no', 'email', 'college', 'bank_acc_no', 'ifsc_code',
                 'employment_type', 'bank_name', 'branch_name', 'branch_code'
               ].map((field) => (
                 <div key={field} className="flex flex-col">
@@ -295,19 +350,6 @@ const StaffManage = () => {
 };
 
 export default StaffManage;
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
