@@ -13,11 +13,7 @@
     "@tailwindcss/vite": "^4.1.11",
     "axios": "^1.11.0",
     "file-saver": "^2.0.5",
-<<<<<<< HEAD
-    "jspdf": "^3.0.3",
-=======
     "jspdf": "^3.0.2",
->>>>>>> e554f52b5573892cedb0bcedce03e24f79a76dac
     "jspdf-autotable": "^5.0.2",
     "lucide-react": "^0.536.0",
     "pdfkit": "^0.17.2",
