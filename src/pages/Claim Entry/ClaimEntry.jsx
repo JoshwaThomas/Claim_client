@@ -13,6 +13,7 @@ import SkilledClaim from './SkilledClaim';
 
 const ClaimEntry = () => {
   const apiUrl = import.meta.env.VITE_API_URL;
+  
   const { data: claimTypes } = useFetch(`${apiUrl}/api/getClaim`);
   const { postData } = usePost();
 
