@@ -95,6 +95,8 @@ const PaymentProcess = () => {
                     <th className="px-4 py-2">Staff Name</th>
                     <th className="px-4 py-2">Claim Type</th>
                     <th className="px-4 py-2">Amount</th>
+                    <th className="px-4 py-2">Account No</th>
+                    <th className="px-4 py-2">IFSC Code</th>
                     <th className="px-4 py-2">Submission Date</th>
                     <th className="px-4 py-2">Credited Date</th>
                     <th className="px-4 py-2">Status</th>
@@ -107,6 +109,8 @@ const PaymentProcess = () => {
                       <td className="px-4 py-2">{claim.staff_name}</td>
                       <td className="px-4 py-2">{claim.claim_type_name}</td>
                       <td className="px-4 py-2">₹{claim.amount}</td>
+                      <td className="px-4 py-2">{claim.account_no}</td>
+                      <td className="px-4 py-2">{claim.ifsc_code}</td>
                       <td className="px-4 py-2">
                         {new Date(claim.submission_date).toLocaleDateString()}
                       </td>

@@ -15,9 +15,6 @@ const ClaimReport = () => {
 
   // Core filtered claims for table
   const filteredClaims = claimData?.filter((claim) => {
-    const isUnsubmitted = !claim.submission_date;
-    const matchesClaimType = claim.claim_type_name?.toLowerCase().includes(claimTypeFilter.toLowerCase());
-
     switch (filter) {
       case 'submitted':
         if (!claim.submission_date) return false;
