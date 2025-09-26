@@ -246,22 +246,30 @@ const StaffManage = () => {
                 <td className="border border-gray-300 px-2 py-2">{s.ifsc_code}</td>
                 <td className="border border-gray-300 px-2 py-2">{s.employment_type}</td>
                 <td className="border border-gray-300 px-2 py-2 ">
-                  <div className='flex justify-center items-center gap-2'>
+                  <div className="flex justify-center items-center gap-3">
                     <button
                       onClick={() => openEditModal(s)}
-                      className="bg-green-600 hover:bg-green-700 text-white font-bold px-5 py-3 rounded transition"
+                      className="inline-flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white font-semibold px-5 py-2.5 rounded-lg shadow-md transition-all duration-300 ease-in-out hover:scale-[1.02] focus:outline-none focus:ring-2 focus:ring-green-400"
                       title="Edit"
                     >
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                        <path d="M15.232 5.232l3.536 3.536M9 11l6.586-6.586a2 2 0 112.828 2.828L11.828 13.828a2 2 0 01-1.414.586H9v-2.414z" />
+                      </svg>
                       Edit
                     </button>
+
                     <button
                       onClick={() => handleDelete(s.staff_id)}
-                      className="bg-red-600 hover:bg-red-700 text-white font-bold px-4 py-3 rounded transition"
+                      className="inline-flex items-center gap-2 bg-red-600 hover:bg-red-700 text-white font-semibold px-5 py-2.5 rounded-lg shadow-md transition-all duration-300 ease-in-out hover:scale-[1.02] focus:outline-none focus:ring-2 focus:ring-red-400"
                       title="Delete"
                     >
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                        <path d="M6 18L18 6M6 6l12 12" />
+                      </svg>
                       Delete
                     </button>
                   </div>
+
                 </td>
               </tr>
             ))}

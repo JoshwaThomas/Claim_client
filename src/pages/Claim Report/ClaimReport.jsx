@@ -230,7 +230,27 @@ const ClaimReport = () => {
                 <td className="p-3 text-sm font-semibold text-gray-600">
                   {claim.credited_date ? new Date(claim.credited_date).toLocaleDateString('en-GB') : '-'}
                 </td>
-                <td className="p-3 text-sm font-semibold text-gray-800">{claim.status}</td>
+                <td className="px-4 py-2">
+                  <span
+                    className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold transition-colors duration-300
+      ${claim.status === 'Credited'
+                        ? 'bg-green-100 text-green-800 border border-green-300'
+                        : 'bg-yellow-100 text-yellow-800 border border-yellow-300'
+                      }`}
+                  >
+                    {claim.status === 'Credited' ? (
+                      <svg className="w-3 h-3 text-green-600" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414L8.414 15l-4.707-4.707a1 1 0 011.414-1.414L8.414 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                      </svg>
+                    ) : (
+                      <svg className="w-3 h-3 text-yellow-600" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M10 2a8 8 0 100 16 8 8 0 000-16zm1 11H9v2h2v-2zm0-8H9v6h2V5z" />
+                      </svg>
+                    )}
+                    {claim.status}
+                  </span>
+                </td>
+
                 <td className="p-3 text-sm font-semibold text-gray-800">{claim.payment_report_id}</td>
               </tr>
             ))}

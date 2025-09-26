@@ -6,6 +6,8 @@ const PaymentProcess = () => {
   const [selectedPrId, setSelectedPrId] = useState(null);
   const [claims, setClaims] = useState([]);
   const [loadingClaims, setLoadingClaims] = useState(false);
+  const [loadingClaimId, setLoadingClaimId] = useState(null);
+
 
   // Fetch PR IDs
   const getPaymentReportIds = async () => {
@@ -38,8 +40,8 @@ const PaymentProcess = () => {
     }
   };
 
-  // Update credited date and remarks
   const markClaimCredited = async (claimId) => {
+    setLoadingClaimId(claimId); // Start loading for this claim
     try {
       const payload = {
         credited_date: new Date(),
@@ -51,8 +53,11 @@ const PaymentProcess = () => {
       );
     } catch (error) {
       console.error('Error updating claim:', error);
+    } finally {
+      setLoadingClaimId(null); // Stop loading
     }
   };
+
 
   useEffect(() => {
     getPaymentReportIds();
@@ -121,11 +126,10 @@ const PaymentProcess = () => {
                       </td>
                       <td className="px-4 py-2">
                         <span
-                          className={`px-2 py-1 rounded-full text-xs font-semibold ${
-                            claim.status === 'Credited'
-                              ? 'bg-green-100 text-green-700'
-                              : 'bg-yellow-100 text-yellow-700'
-                          }`}
+                          className={`px-2 py-1 rounded-full text-xs font-semibold ${claim.status === 'Credited'
+                            ? 'bg-green-100 text-green-700'
+                            : 'bg-yellow-100 text-yellow-700'
+                            }`}
                         >
                           {claim.status}
                         </span>
@@ -133,10 +137,15 @@ const PaymentProcess = () => {
                       <td className="px-4 py-2">
                         <button
                           onClick={() => markClaimCredited(claim._id)}
-                          className="px-3 py-1 bg-green-600 hover:bg-green-700 text-white rounded-md text-sm"
+                          disabled={loadingClaimId === claim._id}
+                          className={`px-3 py-1 rounded-md text-sm transition ${loadingClaimId === claim._id
+                              ? 'bg-gray-400 cursor-not-allowed'
+                              : 'bg-green-600 hover:bg-green-700 text-white'
+                            }`}
                         >
-                          Mark Credited
+                          {loadingClaimId === claim._id ? 'Processing...' : 'Mark Credited'}
                         </button>
+
                       </td>
                     </tr>
                   ))}
