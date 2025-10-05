@@ -575,6 +575,7 @@ const ClaimEntry = () => {
               onChange={(e) => setPhoneNumber(e.target.value)}
               placeholder="Enter Phone Number"
               className="flex-1 px-4 py-2 border font-semibold border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
+              required
             />
             <button
               type="button"
@@ -608,6 +609,7 @@ const ClaimEntry = () => {
                 value={form.amount}
                 onChange={(e) => setForm({ ...form, amount: e.target.value })}
                 className={`mt-2 w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition ${form.claim_type_name === "QPS" ? 'bg-gray-100' : ''}`}
+                required
               />
             </div>
           </div>

@@ -42,50 +42,70 @@ import React from 'react';
 import { FaExclamationCircle, FaMoneyBillWave, FaClipboardList } from 'react-icons/fa';
 
 const ClaimCard = ({ title, count, amount, color = 'blue', showAlert = false }) => {
-  const gradientMap = {
-    blue: 'from-blue-100 to-blue-50 text-blue-800 border-blue-300',
-    green: 'from-green-100 to-green-50 text-green-800 border-green-300',
-    red: 'from-red-100 to-red-50 text-red-800 border-red-300',
-    yellow: 'from-yellow-100 to-yellow-50 text-yellow-800 border-yellow-300',
-    gray: 'from-gray-100 to-gray-50 text-gray-800 border-gray-300',
+  const colorMap = {
+    blue: {
+      bg: 'bg-blue-100',
+      text: 'text-blue-800',
+      border: 'border-blue-300',
+    },
+    green: {
+      bg: 'bg-green-100',
+      text: 'text-green-800',
+      border: 'border-green-300',
+    },
+    red: {
+      bg: 'bg-red-100',
+      text: 'text-red-800',
+      border: 'border-red-300',
+    },
+    yellow: {
+      bg: 'bg-yellow-100',
+      text: 'text-yellow-800',
+      border: 'border-yellow-300',
+    },
+    gray: {
+      bg: 'bg-gray-100',
+      text: 'text-gray-800',
+      border: 'border-gray-300',
+    },
   };
 
-  const gradientClasses = gradientMap[color] || gradientMap.blue;
+  const { bg, text, border } = colorMap[color] || colorMap.blue;
 
   return (
     <div
-      className={`bg-gradient-to-br ${gradientClasses} rounded-2xl p-6 border shadow-lg hover:shadow-2xl transition-all duration-300 ease-in-out relative backdrop-blur-sm`}
+      className={`${bg} ${text} ${border} rounded-xl p-6 border shadow-md hover:shadow-lg transition-all duration-300 ease-in-out relative`}
     >
       {/* Alert Badge */}
       {showAlert && (
-        <div className="absolute top-4 right-4 flex items-center gap-1 text-red-600 text-sm font-semibold bg-white/80 px-2 py-1 rounded-full shadow-sm">
+        <div className="absolute top-4 right-4 flex items-center gap-1 text-red-600 text-sm font-semibold bg-white px-2 py-1 rounded-full shadow">
           <FaExclamationCircle className="text-red-500" />
           Alert
         </div>
       )}
 
       {/* Title */}
-      <h3 className="text-2xl font-bold text-gray-900 mb-4 tracking-tight">{title}</h3>
+      <h3 className="text-2xl font-bold mb-4 tracking-tight">{title}</h3>
 
       {/* Divider */}
-      <div className="h-[1px] bg-gray-300/50 mb-4" />
+      <div className="h-[1px] bg-gray-300 mb-4" />
 
       {/* Count Section */}
       <div className="flex items-center gap-3 mb-3">
-        <div className="bg-white/70 p-2 rounded-full shadow-sm">
+        <div className="bg-white p-2 rounded-full shadow">
           <FaClipboardList className="text-xl text-gray-600" />
         </div>
-        <span className="text-lg font-medium text-gray-700">
+        <span className="text-lg font-medium">
           <strong className="text-gray-900">{count}</strong> claims
         </span>
       </div>
 
       {/* Amount Section */}
       <div className="flex items-center gap-3">
-        <div className="bg-white/70 p-2 rounded-full shadow-sm">
+        <div className="bg-white p-2 rounded-full shadow">
           <FaMoneyBillWave className="text-xl text-gray-600" />
         </div>
-        <span className="text-lg font-medium text-gray-700">
+        <span className="text-lg font-medium">
           ₹<strong className="text-gray-900">{amount.toLocaleString()}</strong>
         </span>
       </div>
@@ -94,3 +114,4 @@ const ClaimCard = ({ title, count, amount, color = 'blue', showAlert = false }) 
 };
 
 export default ClaimCard;
+

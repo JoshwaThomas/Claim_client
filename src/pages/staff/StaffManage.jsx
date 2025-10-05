@@ -221,7 +221,7 @@ const StaffManage = () => {
       {/* Table container with scroll */}
       <div className="overflow-auto border border-gray-300 rounded shadow max-h-[600px] max-w-full mt-5">
         <table className="w-full text-sm text-center border-collapse border border-gray-300 min-w-[900px]">
-          <thead className="bg-purple-900 h-14 text-white sticky top-0 z-10">
+          <thead className="bg-blue-950 h-14 text-white sticky top-0 z-10">
             <tr>
               {['S.No', 'Staff Id', 'Name', 'Dept', 'Designation', 'Category', 'Phone', 'Email', 'College', 'Bank Acc', 'IFSC', 'Emp Type', 'Action'].map((h, i) => (
                 <th key={i} className="px-2 py-2 border border-gray-300 font-bold whitespace-nowrap">
