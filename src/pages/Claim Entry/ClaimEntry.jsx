@@ -573,7 +573,7 @@ const ClaimEntry = () => {
               type="text"
               value={phoneNumber}
               onChange={(e) => setPhoneNumber(e.target.value)}
-              placeholder="Enter Phone Number"
+              placeholder="Enter Phone Number"k
               className="flex-1 px-4 py-2 border font-semibold border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
               required
             />

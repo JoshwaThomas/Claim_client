@@ -19,13 +19,12 @@ const App = () => {
         <Route path="/" element={<Login />} />
 
         {/* Layout with nested routes */}
-        <Route path="layout/:username" element={<Layout />}>
-          {/* Nested routes under Layout */}
-          <Route path="dashboard" element={
-            <ProtectedRoute>
-              <Dashboard />
-            </ProtectedRoute>
-          } />
+        <Route path="layout/:username" element={
+          <ProtectedRoute>
+            <Layout />
+          </ProtectedRoute>
+        }>
+          <Route path="dashboard" element={<Dashboard />} />
           <Route path="staffmanage" element={<StaffManage />} />
           <Route path="claimentry" element={<ClaimEntry />} />
           <Route path="claimmanage" element={<ClaimManage />} />
@@ -33,6 +32,7 @@ const App = () => {
           <Route path="settings/adduser" element={<AddUser />} />
           <Route path="paymentprocessing" element={<PaymentProcess />} />
         </Route>
+
       </Routes>
     </BrowserRouter>
   );
