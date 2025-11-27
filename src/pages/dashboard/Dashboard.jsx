@@ -11,6 +11,9 @@ const Dashboard = () => {
 
   //hooks 
   const { data } = useFetch(`${apiUrl}/api/totalclaimscount`)
+  const { data: staffCounts } = useFetch(`${apiUrl}/api/staffcount`);
+
+
   const { data: staffOverview } = useFetch(`${apiUrl}/api/staffoverview`)
   return (
     <div className="space-y-8 p-4">
@@ -26,27 +29,27 @@ const Dashboard = () => {
 
         <ClaimCard
           title="Total Claims Sanctioned"
-          count={85}
-          amount={420000}
+          count={0}
+          amount={0}
           color="green"
         />
         <ClaimCard
           title="Pending Claims"
-          count={35}
-          amount={130000}
+          count={0}
+          amount={0}
           color="yellow"
         />
         <ClaimCard
           title="Claims Awaiting Sanction (>7 days)"
-          count={10}
-          amount={40000}
+          count={0}
+          amount={0}
           color="red"
           showAlert={true}
         />
         {/* <StaffOverviewCard
           internalCount={456}
           externalCount={78} /> */}
-          {/* <StaffOverviewCard internal={560} external={175} /> */}
+        {/* <StaffOverviewCard internal={560} external={175} /> */}
 
 
       </div>
@@ -71,11 +74,12 @@ const Dashboard = () => {
           <ClaimPieChart
             title="Staff Overview"
             data={[
-              { name: 'Internal Staff', value: 300 },
-              { name: 'External Staff', value: 200 }
+              { name: "Internal Staff", value: staffCounts?.internal || 0 },
+              { name: "External Staff", value: staffCounts?.external || 0 }
             ]}
           />
         </div>
+
       </div>
 
 

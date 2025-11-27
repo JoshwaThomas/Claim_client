@@ -554,6 +554,7 @@ const ClaimEntry = () => {
         <div>
           <label className="text-sm font-semibold text-gray-700">Claim Type</label>
           <select
+          tabIndex={1}
             value={form.claim_type_name}
             onChange={(e) => setForm({ ...form, claim_type_name: e.target.value })}
             className="mt-2 w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
@@ -571,14 +572,16 @@ const ClaimEntry = () => {
           <div className="mt-2 flex gap-2">
             <input
               type="text"
+              tabIndex={2}
               value={phoneNumber}
               onChange={(e) => setPhoneNumber(e.target.value)}
-              placeholder="Enter Phone Number"k
+              placeholder="Enter Phone Number"
               className="flex-1 px-4 py-2 border font-semibold border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
               required
             />
             <button
               type="button"
+              tabIndex={3}
               onClick={handleFetchStaff}
               className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 active:scale-95 transition"
             >
@@ -605,6 +608,7 @@ const ClaimEntry = () => {
               <label className="text-sm font-semibold text-gray-700">Amount</label>
               <input
                 type="number"
+                tabIndex={4}
                 autoComplete="off"
                 value={form.amount}
                 onChange={(e) => setForm({ ...form, amount: e.target.value })}
