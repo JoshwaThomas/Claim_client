@@ -25,25 +25,27 @@ const Layout = () => {
       icon: <FaTachometerAlt />
     },
     {
-      name: 'Staff Manage',
-      path: `/layout/${username}/staffmanage`,
-      icon: <FaUsers />
-    },
-    {
       name: 'Claim Entry',
       path: `/layout/${username}/claimentry`,
       icon: <FaClipboardList />
-    },
-    {
-      name: 'Claim Manage',
-      path: `/layout/${username}/claimmanage`,
-      icon: <FaFileInvoiceDollar />
     },
     {
       name: 'Claim Report',
       path: `/layout/${username}/claimreport`,
       icon: <FaChartBar />
     },
+    {
+      name: 'Staff Manage',
+      path: `/layout/${username}/staffmanage`,
+      icon: <FaUsers />
+    },
+
+    {
+      name: 'Claim Manage',
+      path: `/layout/${username}/claimmanage`,
+      icon: <FaFileInvoiceDollar />
+    },
+
     {
       name: 'Settings',
       icon: <FaUserCircle />,
@@ -114,8 +116,8 @@ const Layout = () => {
                           key={subIndex}
                           to={sub.path}
                           className={`block px-3 py-2 rounded-md text-sm transition duration-200 ${location.pathname === sub.path
-                              ? 'bg-blue-100 text-blue-700 font-medium'
-                              : 'text-gray-700 hover:bg-gray-200 hover:text-blue-600'
+                            ? 'bg-blue-100 text-blue-700 font-medium'
+                            : 'text-gray-700 hover:bg-gray-200 hover:text-blue-600'
                             }`}
                         >
                           {sub.name}
@@ -132,8 +134,8 @@ const Layout = () => {
                 key={index}
                 to={item.path}
                 className={`flex items-center gap-3 px-4 py-2 rounded-md transition duration-200 ${location.pathname === item.path
-                    ? 'bg-blue-100 text-blue-700 font-semibold'
-                    : 'text-gray-700 hover:bg-gray-200 hover:text-blue-600'
+                  ? 'bg-blue-100 text-blue-700 font-semibold'
+                  : 'text-gray-700 hover:bg-gray-200 hover:text-blue-600'
                   }`}
               >
                 <span className="text-lg">{item.icon}</span>

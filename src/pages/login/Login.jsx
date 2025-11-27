@@ -9,11 +9,13 @@ const Login = () => {
   const navigate = useNavigate();
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const [loading, setLoading] = useState(false);
 
   const { postData } = usePost();
 
   const handleLogin = async (e) => {
     e.preventDefault();
+    setLoading(true);
     try {
       const res = await postData(`${apiUrl}/api/login`, {
         username,
@@ -34,6 +36,8 @@ const Login = () => {
     } catch (error) {
       console.error(error);
       Swal.fire('Error', 'An error occurred during login.', 'error');
+    } finally {
+      setLoading(false); // ✅ Ensures loading stops even on error
     }
   };
 
@@ -90,9 +94,11 @@ const Login = () => {
 
             <button
               type="submit"
-              className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2 rounded-lg shadow-md transition duration-300"
+              disabled={loading}
+              className={`w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2 rounded-lg shadow-md transition duration-300 ${loading ? "opacity-70 cursor-not-allowed" : ""
+                }`}
             >
-              Login
+              {loading ? "Logging in..." : "Login"}
             </button>
           </form>
 
@@ -166,12 +172,12 @@ export default Login;
 //       {/* 🔥 Angled Gradient Background */}
 //       <div
 //         className="
-//     absolute inset-0 
-//     bg-gradient-to-tr 
-//     from-[#4A00E0]/40 
-//     via-[#00E7FF]/20 
-//     to-[#00A2FF]/40 
-//     blur-3xl 
+//     absolute inset-0
+//     bg-gradient-to-tr
+//     from-[#4A00E0]/40
+//     via-[#00E7FF]/20
+//     to-[#00A2FF]/40
+//     blur-3xl
 //   "
 //       ></div>
 
@@ -187,17 +193,17 @@ export default Login;
 //       {/* Diagonal Glass Card */}
 //       <div
 //         className="
-//           relative z-10 
-//           w-full max-w-md 
-//           backdrop-blur-2xl 
-//           bg-white/10 
-//           border border-white/20 
-//           rounded-2xl 
-//           p-10 
+//           relative z-10
+//           w-full max-w-md
+//           backdrop-blur-2xl
+//           bg-white/10
+//           border border-white/20
+//           rounded-2xl
+//           p-10
 //           shadow-2xl
-//           transform 
+//           transform
 //           rotate-0
-//           hover:rotate-0 
+//           hover:rotate-0
 //           transition-all duration-500
 //         "
 //       >
@@ -223,13 +229,13 @@ export default Login;
 //                 value={username}
 //                 onChange={(e) => setUsername(e.target.value)}
 //                 className="
-//                   w-full py-3 pl-10 pr-4 
-//                   bg-white/10 
-//                   border border-white/20 
-//                   text-white 
-//                   rounded-lg 
-//                   placeholder-gray-400 
-//                   focus:ring-2 focus:ring-cyan-400 
+//                   w-full py-3 pl-10 pr-4
+//                   bg-white/10
+//                   border border-white/20
+//                   text-white
+//                   rounded-lg
+//                   placeholder-gray-400
+//                   focus:ring-2 focus:ring-cyan-400
 //                   focus:outline-none
 //                 "
 //                 placeholder="Enter username"
@@ -248,13 +254,13 @@ export default Login;
 //                 value={password}
 //                 onChange={(e) => setPassword(e.target.value)}
 //                 className="
-//                   w-full py-3 pl-10 pr-4 
-//                   bg-white/10 
-//                   border border-white/20 
-//                   text-white 
-//                   rounded-lg 
-//                   placeholder-gray-400 
-//                   focus:ring-2 focus:ring-cyan-400 
+//                   w-full py-3 pl-10 pr-4
+//                   bg-white/10
+//                   border border-white/20
+//                   text-white
+//                   rounded-lg
+//                   placeholder-gray-400
+//                   focus:ring-2 focus:ring-cyan-400
 //                   focus:outline-none
 //                 "
 //                 placeholder="••••••••"
@@ -266,14 +272,14 @@ export default Login;
 //           <button
 //             type="submit"
 //             className="
-//               w-full py-3 
-//               text-white 
-//               font-bold 
-//               rounded-lg 
+//               w-full py-3
+//               text-white
+//               font-bold
+//               rounded-lg
 //               bg-gradient-to-r from-teal-600 via-cyan-700 to-blue-500
 //               hover:brightness-110
-//               shadow-xl shadow-cyan-700/40 
-//               transform hover:-translate-y-1 
+//               shadow-xl shadow-cyan-700/40
+//               transform hover:-translate-y-1
 //               transition duration-300
 //             "
 //           >

@@ -554,7 +554,7 @@ const ClaimEntry = () => {
         <div>
           <label className="text-sm font-semibold text-gray-700">Claim Type</label>
           <select
-          tabIndex={1}
+            tabIndex={1}
             value={form.claim_type_name}
             onChange={(e) => setForm({ ...form, claim_type_name: e.target.value })}
             className="mt-2 w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
@@ -673,14 +673,27 @@ const ClaimEntry = () => {
         </div>
 
         {/* Submit Button */}
-        <div className="md:col-span-2 text-right">
+        <div className="md:col-span-2 flex justify-end space-x-3 mt-4">
+          {/* Cancel Button */}
+          {/* <button
+            type="button"
+            className="px-6 py-2 bg-gray-300 text-gray-700 font-medium rounded-lg 
+               hover:bg-gray-400 active:scale-95 transition"
+            onClick={() => navigate(-1)} // or your custom cancel action
+          >
+            Cancel
+          </button> */}
+
+          {/* Submit Button */}
           <button
             type="submit"
-            className="mt-4 px-6 py-2 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 active:scale-95 transition"
+            className="px-6 py-2 bg-blue-600 text-white font-medium rounded-lg 
+               hover:bg-blue-700 active:scale-95 transition"
           >
             Submit
           </button>
         </div>
+
       </form>
     </div>
 

@@ -12,9 +12,17 @@ const Dashboard = () => {
   //hooks 
   const { data } = useFetch(`${apiUrl}/api/totalclaimscount`)
   const { data: staffCounts } = useFetch(`${apiUrl}/api/staffcount`);
+  const { data: creditedCounts } = useFetch(`${apiUrl}/api/creditedclaims`);
+  const { data: pendingCounts } = useFetch(`${apiUrl}/api/pendingclaims`);
+  const { data: awaitingCounts } = useFetch(`${apiUrl}/api/awaitingclaims`);
+  const { data: claimIE } = useFetch(`${apiUrl}/api/internalexternalclaims`);
 
 
-  const { data: staffOverview } = useFetch(`${apiUrl}/api/staffoverview`)
+
+
+
+
+  // const { data: staffOverview } = useFetch(`${apiUrl}/api/staffoverview`)
   return (
     <div className="space-y-8 p-4">
       {/* Claim Summary Cards */}
@@ -29,23 +37,26 @@ const Dashboard = () => {
 
         <ClaimCard
           title="Total Claims Sanctioned"
-          count={0}
-          amount={0}
+          count={creditedCounts?.creditedClaims || 0}
+          amount={creditedCounts?.creditedAmount || 0}
           color="green"
         />
+
         <ClaimCard
           title="Pending Claims"
-          count={0}
-          amount={0}
+          count={pendingCounts?.pendingClaims || 0}
+          amount={pendingCounts?.pendingAmount || 0}
           color="yellow"
         />
+
         <ClaimCard
           title="Claims Awaiting Sanction (>7 days)"
-          count={0}
-          amount={0}
+          count={awaitingCounts?.awaitingClaims || 0}
+          amount={awaitingCounts?.awaitingAmount || 0}
           color="red"
           showAlert={true}
         />
+
         {/* <StaffOverviewCard
           internalCount={456}
           externalCount={78} /> */}
@@ -55,7 +66,7 @@ const Dashboard = () => {
       </div>
 
       {/* Claim Summary Table (Full Width) */}
-      <ClaimSummaryTable />
+      {/* <ClaimSummaryTable /> */}
       <div>
 
       </div>
@@ -65,11 +76,12 @@ const Dashboard = () => {
           <ClaimPieChart
             title="Claims Breakdown"
             data={[
-              { name: 'Internal Claims', value: 300 },
-              { name: 'External Claims', value: 200 }
+              { name: "Internal Claims", value: claimIE?.internal || 0 },
+              { name: "External Claims", value: claimIE?.external || 0 }
             ]}
           />
         </div>
+
         <div className="w-full md:w-1/2">
           <ClaimPieChart
             title="Staff Overview"
