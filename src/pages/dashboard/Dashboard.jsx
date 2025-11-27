@@ -17,7 +17,7 @@ const Dashboard = () => {
       {/* Claim Summary Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
         <ClaimCard
-          title="Total Claims Received"
+          title="Total Claims Updated"
           count={data?.totalClaims || 0}
           amount={data?.totalAmount || 0}
           color="blue"
