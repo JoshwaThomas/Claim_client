@@ -16,7 +16,7 @@ const StaffManage = () => {
   const [formData, setFormData] = useState({
     staff_id: '', staff_name: '', department: '', category: '', designation: '',
     phone_no: '', email: '', college: '', bank_acc_no: '',
-    ifsc_code: '', employment_type: '', bank_name: '', branch_name: '', branch_code: ''
+    ifsc_code: '', employment_type: '', bank_name: '', branch_name: ''
   });
 
   const [currentPage, setCurrentPage] = useState(1);
@@ -35,10 +35,10 @@ const StaffManage = () => {
   useEffect(() => { fetchStaff(); }, []);
 
   useEffect(() => {
-    let filtered = allStaff.filter(item =>
-      (item.staff_name || '').toString().toLowerCase().includes(searchQuery.toLowerCase()) ||
-      (item.email || '').toString().toLowerCase().includes(searchQuery.toLowerCase()) ||
-      (item.phone_no || '').toString().toLowerCase().includes(searchQuery.toLowerCase())
+    let filtered = allStaff.filter(s =>
+      (s.staff_id || "").toString().toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (s.staff_name || "").toString().toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (s.phone_no || "").toString().toLowerCase().includes(searchQuery.toLowerCase())
     );
 
     if (filters.department) filtered = filtered.filter(s => s.department === filters.department);
@@ -103,9 +103,11 @@ const StaffManage = () => {
   };
 
   const getUniqueValues = (key) => {
-    const values = staffList.map(item => item[key]).filter(Boolean);
+    const values = allStaff.map(item => item[key]).filter(Boolean);
     return [...new Set(values)];
   };
+
+
 
   const totalPages = Math.ceil(staffList.length / itemsPerPage);
   const paginatedStaff = staffList.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
@@ -316,24 +318,99 @@ const StaffManage = () => {
             </h2>
             <form onSubmit={handleSubmitForm} className="grid grid-cols-2 gap-4">
               {[
-                'staff_id', 'staff_name', 'department', 'designation', 'category',
-                'phone_no', 'email', 'college', 'bank_acc_no', 'ifsc_code',
-                'employment_type', 'bank_name', 'branch_name', 'branch_code'
+                "staff_id", "staff_name", "department", "designation", "category",
+                "phone_no", "email", "college", "bank_acc_no", "ifsc_code",
+                "employment_type", "bank_name", "branch_name"
               ].map((field) => (
                 <div key={field} className="flex flex-col">
+
                   <label className="mb-1 font-medium capitalize">
-                    {field.replace(/_/g, ' ')}
+                    {field.replace(/_/g, " ")}
                   </label>
-                  <input
-                    type="text"
-                    placeholder={field.replace(/_/g, ' ')}
-                    required
-                    value={formData[field] || ''}
-                    onChange={e => setFormData({ ...formData, [field]: e.target.value })}
-                    className="border p-2 rounded"
-                  />
+
+                  {/* CATEGORY — FIXED VALUES */}
+                  {field === "category" ? (
+                    <select
+                      value={formData[field] || ""}
+                      onChange={(e) =>
+                        setFormData({
+                          ...formData,
+                          [field]: e.target.value, // normal
+                        })
+                      }
+                      // ❌ removed required here
+                      className="border p-2 rounded"
+                    >
+                      <option value="">Select Category</option>
+                      <option value="AIDED">AIDED</option>
+                      <option value="SFM">SFM</option>
+                      <option value="SFW">SFW</option>
+                    </select>
+
+                  ) : field === "employment_type" ? (
+
+                    /* EMPLOYMENT TYPE — FIXED VALUES */
+                    <select
+                      required
+                      value={formData[field] || ""}
+                      onChange={(e) =>
+                        setFormData({
+                          ...formData,
+                          [field]: e.target.value,
+                        })
+                      }
+                      className="border p-2 rounded"
+                    >
+                      <option value="">Select Employment Type</option>
+                      <option value="INTERNAL">INTERNAL</option>
+                      <option value="EXTERNAL">EXTERNAL</option>
+                    </select>
+
+                  ) : /* DROPDOWNS FROM DB */
+                    ["department", "designation", "college", "bank_name"].includes(field) ? (
+                      <select
+                        required
+                        value={formData[field] || ""}
+                        onChange={(e) =>
+                          setFormData({
+                            ...formData,
+                            [field]: e.target.value,
+                          })
+                        }
+                        className="border p-2 rounded"
+                      >
+                        <option value="">Select {field.replace(/_/g, " ")}</option>
+                        {getUniqueValues(field).map((val, idx) => (
+                          <option key={idx} value={val}>
+                            {val}
+                          </option>
+                        ))}
+                      </select>
+                    ) : (
+
+                      /* NORMAL INPUT FIELDS */
+                      <input
+                        type="text"
+                        placeholder={field.replace(/_/g, " ")}
+                        value={formData[field] || ""}
+                        onChange={(e) =>
+                          setFormData({
+                            ...formData,
+                            [field]:
+                              field === "ifsc_code"
+                                ? e.target.value.toUpperCase() // IFSC uppercase only
+                                : e.target.value,
+                          })
+                        }
+                        // ❌ staff_id is NOT required
+                        // other fields required
+                        required={field !== "staff_id"}
+                        className="border p-2 rounded"
+                      />
+                    )}
                 </div>
               ))}
+
               <div className="col-span-2 flex justify-end gap-3 mt-4">
                 <button
                   type="button"
@@ -350,6 +427,8 @@ const StaffManage = () => {
                 </button>
               </div>
             </form>
+
+
           </div>
         </div>
       )}
